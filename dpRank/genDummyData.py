@@ -10,20 +10,20 @@ def gen_documents(nr_docs, V):
     
     return doc_dic
     
-# dummy generation of documents and their features
+# dummy generation of query features
 def gen_queries(nr_q, T):
     q_dic = {}
     for i in range(nr_q):
-        q_dic['q_%i' %i] = np.random.random_integers(2, 5, T) 
+        x =  np.random.random_integers(2, 5, T)
+        q_dic['q_%i' %i] = x/x.sum()
     return q_dic
 
-# dummy generation of query features
+# dummy assignment of queries to users
 def gen_user_query(N, queries):
     user_q = {}
     for i in range(N):
         size = np.random.random_integers(1, len(queries), 1)
         q_set = []
-        print len(queries)
         for j in range(size):
             q_set.append('q_%i' %np.random.random_integers(1, len(queries)-1,1)[0])
         user_q['user_%i' %i] = set(q_set)
@@ -62,7 +62,7 @@ def gen_dummy(nr_docs, nr_queries, N):
     T = 5
     # nr of document features
     V = 65
-
+    
     # generate documents with random features
     docs = gen_documents(nr_docs, V)
     # generate queries with random features
