@@ -49,15 +49,22 @@ def generate_indices(x, k):
 # k is the number of samples (experiments)  
 def DP(k, p, theta):
     x = np.random.multinomial(k, p)
-    b = generate_indices(x, k)
-    return theta[b, :]
+    # below is testing, ignore
+    #indices = []
+    #for i in range(len(x)):
+    #    if x[i] > 0:
+    #        indices.append(i)
+    indices = generate_indices(x, k)
+    return theta[indices, :]
 
 def stick(alpha, k):
     # beta distribution for constructing the stick
     betas = np.random.beta(1.0, alpha, k)
     remaining_pieces = np.append(1, np.cumprod(1 - betas[:-1]))
     p = betas * remaining_pieces
-    return p/p.sum()
+    # do not normalize in order to have values
+    # on the auxiliary gamma_e variable later
+    return p
     
 def proof_check(theta, dp, fig_n):
     bins = np.zeros(np.shape(theta)[0])
@@ -71,12 +78,14 @@ def proof_check(theta, dp, fig_n):
     plt.bar(np.arange(len(bins)), bins, width = 0.01)
     plt.show()
  
- 
+
+# eq.2 of the paper 
 def joint_q_d(theta_c, query, click_list, docs, T):
     # get the parameters for the group
     mu_c = theta_c[0:T]
     sigma_c = theta_c[T:2*T]
     beta_c = theta_c[2*T:]
+    
     
     # get the corresponding clicks and non clicks
     ind_clicked = [i for i, v in enumerate(click_list) if v[1] == 1]
