@@ -1,4 +1,5 @@
-NonParametric
+AIR project 2
 =============
 
-dpRank implementation
+ - Feature extraction
+ - dpRank implementation
