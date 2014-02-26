@@ -136,5 +136,25 @@ def pair_pref(beta_c, doc_i, doc_j):
 
 #def uns_stirling(n,k):
 #    return stirling1(n,k)
+
+# caching, for faster computation
+def memoize(func):
+    S = {}
+    def wrappingfunction(*args):
+        if args not in S:
+            S[args] = func(*args)
+        return S[args]
+    return wrappingfunction
     
+@memoize
+def stirling1(n,k):
+    """Returns the stirling number of the first kind using recursion.."""
+    if n == 0 and k == 0:
+       return 1
+    if k == 0 and n >= 1:
+       return 0
+    if k > n:
+       return 0
+    return stirling1(n-1, k-1) + (n - 1) * stirling1(n-1, k)
+  
 
