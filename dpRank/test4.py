@@ -7,6 +7,7 @@ from natsort import natsorted
 import math
 import itertools
 import utils as u
+from pymc import dirichlet_expval
 
 # hyperparameters
 mu0 = 0
@@ -130,7 +131,9 @@ def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, act
                 
                 # since we are use log probabilities, add the ones from each user
                 assign[i] += term + p_q_d_k
-
+        
+        # maybe its better to normalize and pick one at random with weighted probability
+        # by the assign vector?
         most_prob_k = assign.argmax() # get the most probable assignment
         
         print assign, most_prob_k
@@ -190,14 +193,56 @@ def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, act
     # return basically everything (need to check what is actually needed)
     return active_components, gamma_k, gamma_e, theta_c, theta_e
 
-'''    
-def sample_g(gamma_e, alpha, gamma_k):
+
+def sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q):
+    # get the active components
     K = gamma_k.shape[0]
-    print np.prod([gamma_k[k] ** np.sum([i - 1 for i in h]) for k in range(K)])
-    p_g = gamma_e ** (alpha - 1)
-'''    
+    # init the random variable h
+    m_uik = np.zeros((len(user_q), K), dtype = int)
+    
+    # find the m_uik for every user
+    for i in range(len(active_components)):
+        comp_qs  = set(active_components[i])
+        cnt = 0
+        for user in natsorted(user_q.keys()):
+            users_q = set(user_q[user])
+            m_uik[cnt, i] = len(comp_qs.intersection(users_q))
+            cnt += 1
+    
+             
+    # it seems that we need to sample h first
+    # and based on that we sample gamma  
+    h_uik = np.zeros((len(user_q), K)) 
+    for i in range(len(user_q)):
+        for j in range(K):
+            # do not keep the first value (0) since 
+            # the stirling1 will produce 0 so it doesn't
+            # affect the probabilities
+            h_candidates = np.asfarray([u.stirling1(m_uik[i,j], h) * \
+                            (eta * gamma_k[j])** h for h in range(m_uik[i,j])[1:]])
+            # normalize and pick the maximum
+            # again maybe we need to pick a random one according to those probabilities?
+            h_candidates /= h_candidates.sum()
+            if h_candidates.shape[0] > 0:
+                h_uik[i,j] = h_candidates.argmax() + 1
+            
+    dir_params = np.zeros(K + 1)
+    for k in range(K + 1):
+        if k < K:
+            dir_params[k] = np.sum(h_uik[:,k])
+        else:
+            dir_params[k] = alpha
+
+    g = dirichlet_expval(dir_params)
+    gamma_k = g[:-1]
+    gamma_e = g[-1]
+    
+    print gamma_k, gamma_e
+    return gamma_k, gamma_e
 
 
 active_components, gamma_k, gamma_e, theta_c, theta_e = sample_c(queries, 
                                             user_q, eta, theta, theta_e, gamma_k, gamma_e, docs, active_components)
+
+gamma_k, gamma_e = sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q)
 
