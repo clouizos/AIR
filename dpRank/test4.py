@@ -104,48 +104,53 @@ def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, act
         # users that have that query
         users = [i for i in user_q if query in user_q[i]]
         print 'users for that query: ' +str(users)
+        # log probabilities of assignment of a query to a component
         assign = np.zeros(K+1)
         
         # for each user estimate the probability of the query belonging to group k
         for user in natsorted(users):
+            # get the other queries of the user except the one estimated right now
             other_queries = set(natsorted(user_q[user])) - set([query])
             
+            # for each component + the auxiliary one
             for i in range(K+1):
                 mu_k = 0
                 # find how many of the other queries of the user 
-                # belong to the group k
-                for other in other_queries:
-                    try:
+                # belong to the group k (only check active components)
+                if i < K:
+                    for other in other_queries:
                         if other in active_components[i]:
                             mu_k += 1
-                    except:
-                        pass
-                try:
+                if i < K: # checking assumed active components
                     term = np.log(eta*gamma_k[i] + mu_k)
                     p_q_d_k = u.joint_q_d(theta_c[i,:], queries[query], user_clicks[user+':'+query], docs, T)
-                except:
+                else:   # checking auxiliary component
                     term = np.log(eta*gamma_e + mu_k)
                     p_q_d_k = u.joint_q_d(theta_e, queries[query], user_clicks[user+':'+query], docs, T)
                 
+                # since we are use log probabilities, add the ones from each user
                 assign[i] += term + p_q_d_k
 
-        most_prob_k = assign.argmax()
+        most_prob_k = assign.argmax() # get the most probable assignment
         
         print assign, most_prob_k
+        
+        # if we have a component that is considered active
         if most_prob_k < K:
-            print 'existing component.'
 
             # in the existing active groups
             active_components[most_prob_k].append(query)
             
             # filter out the empty ones
             ind = []
+            # counter to get the indices
             cnt = 0
             for component in active_components:
                 # if empty active component
                 if not component:
                     ind.append(cnt)
                 cnt += 1
+            # get the new non-empty active components
             active_components = [v for i, v in enumerate(active_components) if i not in ind]
             
             # set new K, delete params for the K's that got removed
@@ -158,15 +163,17 @@ def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, act
             print active_components
             print np.shape(theta_c)
             print gamma_k, gamma_e
+        # if we have the auxiliary component
         else:
-            # if it is the auxiliary group                 
-            print 'auxiliary component.'
             
+            # add it to the active components
             active_components.append([query])
-            # add the new parameters and new theta_e
+            
+            # add the parameters of the auxiliary component to the active ones
+            # and determine the new auxiliary theta_e
             theta_c = np.vstack((theta_c, theta_e))
             theta_e =  np.hstack((mu_kt.random(), tau_kt.random(), beta_ku.random()))
-            # new gamma and gamma_e
+            # new gamma for the new component and new auxiliary gamma_e
             b = np.random.beta(1.0, alpha)
             gamma_k = np.append(gamma_k, b*gamma_e)
             gamma_e = (1 - b) * gamma_e
@@ -180,8 +187,17 @@ def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, act
     print theta_c.shape
     print gamma_k, gamma_e
     
-    return active_components
-    
+    # return basically everything (need to check what is actually needed)
+    return active_components, gamma_k, gamma_e, theta_c, theta_e
+
+'''    
+def sample_g(gamma_e, alpha, gamma_k):
+    K = gamma_k.shape[0]
+    print np.prod([gamma_k[k] ** np.sum([i - 1 for i in h]) for k in range(K)])
+    p_g = gamma_e ** (alpha - 1)
+'''    
 
 
-active_components = sample_c(queries, user_q, eta, theta, theta_e, gamma_k, gamma_e, docs, active_components)
+active_components, gamma_k, gamma_e, theta_c, theta_e = sample_c(queries, 
+                                            user_q, eta, theta, theta_e, gamma_k, gamma_e, docs, active_components)
+
