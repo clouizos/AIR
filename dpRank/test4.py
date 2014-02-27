@@ -272,14 +272,31 @@ def sample_theta(active_components, theta, queries):
             # UPDATE!
             current_mu_kt = np.random.normal(mu_n_kt, sigma_n_kt)
 
+            sum_of_user_queries_minus_mu = 0
+            for q in queries_of_k:
+                sum_of_user_queries_minus_mu += (queries[q][t] - current_mu_kt)**2
+
+            alpha_n_kt = alpha0 + nk/2
+            beta_nk_t = beta0 + 1/2 * sum_of_user_queries_minus_mu
+
+            current_sigma_kt = np.random.gamma(alpha_n_kt, beta_nk_t, 1)
+
+            # write result to subvector
+            mu_k[t] = current_mu_kt
+            sigma_k[t] = current_sigma_kt
+
+        # write vector update to theta
+        theta[k, 0:T] = mu_k
+        theta[k, T: 2*T] = sigma_k
 
     return theta
 
 
+# make this iteratively?
 active_components, gamma_k, gamma_e, theta_c, theta_e = sample_c(queries, 
                                             user_q, eta, theta, theta_e, gamma_k, gamma_e, docs, active_components)
 
 gamma_k, gamma_e = sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q)
 
-sample_theta(active_components, theta, queries)
+theta = sample_theta(active_components, theta, queries)
 
