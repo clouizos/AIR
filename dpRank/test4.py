@@ -134,7 +134,12 @@ def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, act
         
         # maybe its better to normalize and pick one at random with weighted probability
         # by the assign vector?
-        most_prob_k = assign.argmax() # get the most probable assignment
+        assign /= assign.sum()
+        # get a random assignment according to the assign probabilities
+        most_prob_k = np.random.choice(range(len(assign)), 1, p=assign)[0]
+        # get the most probable assignment
+        #most_prob_k = assign.argmax()
+        
         
         print assign, most_prob_k
         
@@ -223,9 +228,13 @@ def sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q):
             # normalize and pick the maximum
             # again maybe we need to pick a random one according to those probabilities?
             h_candidates /= h_candidates.sum()
-            if h_candidates.shape[0] > 0:
-                h_uik[i,j] = h_candidates.argmax() + 1
             
+            if h_candidates.shape[0] > 0:
+                # max one
+                #h_uik[i,j] = h_candidates.argmax() + 1
+                # random one
+                h_uik[i,j] = np.random.choice(range(m_uik[i,j])[1:], 1, p=h_candidates)[0]
+    
     dir_params = np.zeros(K + 1)
     for k in range(K + 1):
         if k < K:
