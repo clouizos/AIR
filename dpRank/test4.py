@@ -240,9 +240,63 @@ def sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q):
     print gamma_k, gamma_e
     return gamma_k, gamma_e
 
+def sample_theta(active_components, theta, queries):
+    print 
+    print
+    print "There are ", len(active_components), " active_components"
+    
+    # I think this should be K (the number of active_components, but K != len(active_components))
+    for k in range(len(active_components)):
 
+        mu_k = theta[k, 0:T]
+        sigma_k = theta[k, T: 2*T]
+        nk = len(active_components[k])
+        queries_of_k = active_components[k]
+
+        # per feature we will update mu and sigma
+        for t in range(T):    
+            
+            # can this be made more efficient?
+            # is it actually correct?
+            sum_of_user_queries = 0
+            for q in queries_of_k:
+                sum_of_user_queries += queries[q][t]
+
+            current_sigma_kt = sigma_k[t]
+            current_mu_kt = mu_k[t]
+            lambda_kt = 1 / current_sigma_kt
+            
+            sigma_n_kt = 1 / ((nk*lambda_kt) + 1 / sigma0)
+            mu_n_kt = sigma_n_kt * ((mu0 / sigma0) + (sum_of_user_queries / current_sigma_kt))
+
+            # UPDATE!
+            current_mu_kt = np.random.normal(mu_n_kt, sigma_n_kt)
+
+            sum_of_user_queries_minus_mu = 0
+            for q in queries_of_k:
+                sum_of_user_queries_minus_mu += (queries[q][t] - current_mu_kt)**2
+
+            alpha_n_kt = alpha0 + nk/2
+            beta_nk_t = beta0 + 1/2 * sum_of_user_queries_minus_mu
+
+            current_sigma_kt = np.random.gamma(alpha_n_kt, beta_nk_t, 1)
+
+            # write result to subvector
+            mu_k[t] = current_mu_kt
+            sigma_k[t] = current_sigma_kt
+
+        # write vector update to theta
+        theta[k, 0:T] = mu_k
+        theta[k, T: 2*T] = sigma_k
+
+    return theta
+
+
+# make this iteratively?
 active_components, gamma_k, gamma_e, theta_c, theta_e = sample_c(queries, 
                                             user_q, eta, theta, theta_e, gamma_k, gamma_e, docs, active_components)
 
 gamma_k, gamma_e = sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q)
+
+theta = sample_theta(active_components, theta, queries)
 
