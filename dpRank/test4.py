@@ -269,7 +269,7 @@ def sample_theta(active_components, theta, queries):
             sigma_n_kt = 1 / ((nk*lambda_kt) + 1 / sigma0)
             mu_n_kt = sigma_n_kt * ((mu0 / sigma0) + (sum_of_user_queries / current_sigma_kt))
 
-            # UPDATE!
+            # UPDATE mu here to use to compute sigma_kt
             current_mu_kt = np.random.normal(mu_n_kt, sigma_n_kt)
 
             sum_of_user_queries_minus_mu = 0
