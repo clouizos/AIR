@@ -3,10 +3,7 @@ from scipy.stats import norm
 import numpy as np
 import matplotlib.pyplot as plt
 from natsort import natsorted
-import math
-import itertools
-#from nzmath.combinatorial import stirling1
-
+import math, itertools, random
 
 
 class random_normal:
@@ -132,10 +129,132 @@ def joint_q_d(theta_c, query, click_list, docs, T):
 # eq.1 of the paper
 def pair_pref(beta_c, doc_i, doc_j):
     return 1/(1 + np.exp(- np.dot(beta_c.T, doc_i - doc_j )))
-    
 
-#def uns_stirling(n,k):
-#    return stirling1(n,k)
+# gradient of eq.1 of the paper (needed for HMC)   
+def grad_pair_pref(beta_c, doc_i, doc_j):
+    return (1/(1 + np.exp(- np.dot(beta_c.T, doc_i - doc_j )))) * \
+                    ((doc_i - doc_j) * np.exp(np.dot(-beta_c.T, doc_i - doc_j)))
+
+# queries are the queries of a given group k
+# beta_k, mu_k, sigma_k are the parameters of the group k
+# users are the users of having queries in group k
+def eval_loglike_theta(theta_k, queries, component, users, user_q, click_list, docs, prior_params):
+    alpha0 = prior_params[0]
+    mu0 = prior_params[1]
+    sigma0 = prior_params[2]
+    T = prior_params[3]
+    
+    beta_k = theta_k[2*T:]
+    mu_k = theta_k[0:T]
+    sigma_k = theta_k[T:2*T]
+    
+    # estimate each one independently since we have i.i.d. samples
+    # likelihood according to the prior distributions
+    first_term = np.sum([np.log(norm(0, alpha0).pdf(beta_k[i])) for i in range(beta_k.shape[0])])
+    first_term += np.sum([np.log(norm(mu0, sigma0).pdf(mu_k[i])) for i in range(mu_k.shape[0])])
+    first_term += np.sum([np.log(norm(mu0, sigma0).pdf(sigma_k[i])) for i in range(sigma_k.shape[0])])
+    
+    # likelihoods given query and click list
+    sec_term = 0
+    for query in natsorted(component):
+        for user in natsorted(users):
+            # if user has that query
+            if query in user_q[user]:
+                sec_term += joint_q_d(theta_k, queries[query], click_list[user+':'+query], docs, T)
+        
+    return first_term + sec_term
+    
+def eval_grad_loglike_theta(theta_k, queries, component, users, user_q, click_list, docs, prior_params):
+    T = prior_params[3]
+    beta_k = theta_k[2*T:]
+    grad = 0
+    for query in natsorted(component):
+        for user in natsorted(users):
+            # if user has that query
+            if query in user_q[user]:
+                user_specific_click_list =  click_list[user+':'+query]
+                
+                # get the corresponding clicks and non clicks
+                ind_clicked = [i for i, v in enumerate(user_specific_click_list) if v[1] == 1]
+                ind_not_clicked = [i for i, v in enumerate(user_specific_click_list) if v[1] == 0]
+    
+                # create all the combinations
+                comb = list(itertools.product(*[ind_clicked, ind_not_clicked]))
+                pair_prefs = []
+                # for each element find the pairwise ranking preferences
+                for elem in comb:
+                    pair_prefs.append(grad_pair_pref(beta_k, docs[user_specific_click_list[elem[0]][0]], docs[user_specific_click_list[elem[1]][0]]))
+                
+                # if there was such a combination
+                if len(pair_prefs) > 1:
+                    grad += np.sum(pair_prefs)
+                    
+    return grad
+    
+def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, docs, prior_params):
+    # define stepsize of MCMC.
+    stepsize = 0.000047
+    accepted = 0.0
+    #beta_k = theta_k[2*T:]
+    chain = [theta_k]
+    T = prior_params[3]
+    V = prior_params[4]
+    
+    for i in range(iterations):
+        old_theta_k = chain[len(chain) - 1]
+        old_energy = -eval_loglike_theta(theta_k, queries, 
+                        component, users, user_q, user_clicks, docs, prior_params)
+        #print 'old_energy: ' + str(old_energy)
+        old_grad = -eval_grad_loglike_theta(old_theta_k, queries, component, 
+                            users, user_q, user_clicks, docs, prior_params)
+        #print 'old grad: ' + str(old_grad)
+        
+        new_theta_k = np.copy(old_theta_k)  # deep copy of array
+        new_grad  = np.copy(old_grad)   # deep copy of array
+        
+        # Suggest new candidate using gradient + Hamiltonian dynamics.
+        # draw random momentum vector from unit Gaussian.
+        p = np.random.normal(0, 1, V)
+        H = np.dot(p,p)/2.0 + old_energy    # compute Hamiltonian
+        
+        new_beta_k = new_theta_k[2*T:]
+        # Do 5 Leapfrog steps.
+        for tau in range(5):
+            # make half step in p
+            p = p - stepsize*new_grad/2.0
+            # make full step in alpha,
+            # but only the beta parameters, mu_k, simga_k 
+            # are fixed from previously
+            new_beta_k = new_beta_k + stepsize*p
+            new_theta_k[2*T:] = new_beta_k
+            # compute new gradient
+            new_grad  = -eval_grad_loglike_theta(new_theta_k, queries, component, 
+                                                users, user_q, user_clicks, docs, prior_params)
+            if new_grad == 0:
+                new_grad = 10 ** (-50)
+            # make half step in p
+            p = p - stepsize*new_grad/2.0
+            
+        # Compute new Hamiltonian. Remember, energy = -loglik.
+        new_energy = -eval_loglike_theta(new_theta_k, queries, 
+                        component, users, user_q, user_clicks, docs, prior_params)
+        #print 'new energy: ' + str(new_energy)
+        newH = np.dot(p,p)/2.0 + new_energy
+        dH = newH - H
+
+        # Accept new candidate in Monte-Carlo fashion.
+        if (dH < 0.0):
+            chain.append(new_theta_k)
+            accepted = accepted + 1.0
+        else:
+            u = random.uniform(0.0,1.0)
+            if (u < math.exp(-dH)):
+                chain.append(new_theta_k)
+                accepted = accepted + 1.0
+            else:
+                chain.append(old_theta_k)
+                
+    return chain
 
 # caching, for faster computation
 def memoize(func):
