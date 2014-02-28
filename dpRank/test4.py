@@ -368,8 +368,7 @@ for i in range(gibbs_iter):
     print 'Doing iteration ' + str(i+1)+' ...'
     # make this iteratively?
     params = {}
-    active_components, gamma_k, gamma_e, theta_c, theta_e = sample_c(queries,     # here you need to take the new theta_c because theta is the old one 
-    # (according to the old components)
+    active_components, gamma_k, gamma_e, theta_c, theta_e = sample_c(queries, 
                                             user_q, eta, theta_c, theta_e, gamma_k, gamma_e, 
                                             docs, active_components, user_clicks)
     
