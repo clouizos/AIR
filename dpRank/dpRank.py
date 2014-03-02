@@ -5,95 +5,11 @@ from genDummyData import gen_dummy
 from natsort import natsorted
 import utils as u
 import pymc
+import multiprocessing as mpc
 
-# hyperparameters
-mu0 = 0
-sigma0 = 0.5
-alpha0 = 1.0
-beta0 = 0.5
-alpha = 1.0
-eta = 0.1
-
-# k is mentioned to infinite in the paper
-# set to a very large number for now
-# will create a trunctated DP that approximates
-# the infinite one
-# init number of groups, will change according to the data
-K = 5
-
-# nr of query features
-T = 5
-# nr of document features
-V = 65
-# nr of users
-N = 20
-
-# args for the dummy data generator   
-nr_docs = 100
-nr_queries = 20
-
-# active components (components that have observations)
-active_components = [[] for i in range(K)]
-
-# get some dummy data
-docs, queries, user_q, q_doc, user_clicks = gen_dummy(nr_docs, nr_queries, N)
-
-# gibbs sampler params
-gibbs_iter = 20
-thinning = 5
-burnin = int(0.2 * gibbs_iter)
- 
-      
-''' priors of the G0 '''
-# prior means
-mu_kt = u.random_normal(mu0, sigma0, T)
-# prior precision
-tau_kt = u.random_gamma(alpha0, beta0, T)
-# prior beta_ku
-beta_ku = u.random_normal(0, alpha0, V)
-    
-'''   
-# double layer of the DP
-# needs to be done for each user
-p2 = u.stick(eta, K)
-theta_k = np.zeros((N, K))
-# for all users
-for i in range(N):
-    theta_k[i,:] = u.stick(alpha, K)
-
-# generate the pi's
-pis = u.DP(N, p2, theta_k)
-'''
-
-#print pis
-#u.proof_check(theta_k, pis, 2)
-
-
-# initial gamma
-gamma_k = u.stick(alpha, K)
-# gamma_e auxiliary variable
-gamma_e = 1 - np.sum(gamma_k)
-
-# params according to the draws from the truncated DP
-# essentially each group has its own means, variances and betas
-# initial parameters
-theta_c = np.zeros((K,2*T + V))
-# active thetas    
-for i in range(K):
-    theta_c[i,0:T] = mu_kt.random()
-    theta_c[i, T: 2*T] = tau_kt.random()
-    theta_c[i, 2*T:] = beta_ku.random()
-
-# theta_e auxiliary variable
-theta_e = np.hstack((mu_kt.random(), tau_kt.random(), beta_ku.random()))
-
-# remove queries that have no users assigned (only applicable to the dummy data)
-for query in natsorted(queries):
-    if len([i for i in user_q if query in user_q[i]]) == 0:
-        del queries[query]
-  
 # sampling of c is performed for every query from the users in the given collection     
-def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, active_components, user_clicks):
+def sample_c(queries, user_q, alpha, eta, theta_c, theta_e, gamma_k, gamma_e, docs, active_components, user_clicks):
+    #print 'assignment_sampling Starting'
     # for all queries
     # get the number of active components
     K = theta_c.shape[0]
@@ -232,10 +148,14 @@ def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, act
     gamma_e = 1 - np.sum(gamma_k)
     
     # return basically everything (need to check what is actually needed)
+    #print 'assignment_sampling Exiting'
     return active_components, gamma_k, gamma_e, theta_c, theta_e
 
 
-def sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q):
+def sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q, out_q):
+    #name = mpc.current_process().name
+    #print name, 'Starting'
+    
     # get the active components
     K = gamma_k.shape[0]
     # init the random variable h
@@ -287,11 +207,23 @@ def sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q):
     gamma_k = g[:-1]
     gamma_e = g[-1]
     
-    #print gamma_k, gamma_e
-    return gamma_k, gamma_e
+    if out_q != None:
+        key = ['gamma_k', 'gamma_e']
+        value = [gamma_k, gamma_e]
+        out_q.put(dict(zip(key,value)))
+        #print name, 'Exiting'
+    else:
+        return gamma_k, gamma_e
 
-def sample_theta(active_components, theta_c, queries):
+def sample_theta(active_components, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, out_q):
     
+    #name = mpc.current_process().name
+    #print name, 'Starting'
+    mu0 = prior_params[1]
+    sigma0 = prior_params[2]
+    alpha0 = prior_params[0]
+    beta0 = prior_params[5]
+
     # I think this should be K (the number of active_components, but K != len(active_components))
     for k in range(len(active_components)):
 
@@ -335,91 +267,193 @@ def sample_theta(active_components, theta_c, queries):
         # write vector update to theta
         theta_c[k, 0:T] = mu_k
         theta_c[k, T: 2*T] = sigma_k
-
-    return theta_c
-
-
         
-def sample_weights(active_components, theta_c, queries, user_q, docs, user_clicks, tot_iter = 20):
-
-    prior_params = [alpha0, mu0, sigma0, T, V]
-    new_theta_c = np.zeros(theta_c.shape)
-    
-    # for every group
-    for k in range(len(active_components)):
-        #beta_k = theta_c[k, 2*T:]
+        # begin the update for the weights beta_c
         users = []
-        queries_check = set(active_components[k])
+        queries_check = set(queries_of_k)
         for user in natsorted(user_q):
             if len(set(user_q[user]).intersection(queries_check)) > 1:
                 users.append(user)
                 
-        chain = u.HMC(tot_iter, theta_c[k,:], queries, active_components[k], users, user_q, user_clicks, docs, prior_params)
+        chain = u.HMC(iter_HMC, theta_c[k,:], queries, active_components[k], users, user_q, user_clicks, docs, prior_params)
         # Discard first 20% of MCMC chain
         clean = []
-        for n in range(int(0.2 * tot_iter),len(chain)):
+        for n in range(int(0.2 * iter_HMC),len(chain)):
             # thin the samples
             if (n % 2 == 0):
                 clean.append(chain[n])
                 
-        new_theta_c[k,:] = np.mean(clean, axis = 0)
+        theta_c[k,:] = np.mean(clean, axis = 0)
     
-    return new_theta_c
+    if out_q != None:
+     out_q.put(dict(theta_c = theta_c))
+     #print name, 'Exiting'
+    else:
+        return theta_c   
+
+if __name__ == '__main__':
+    # hyperparameters
+    mu0 = 0
+    sigma0 = 0.5
+    alpha0 = 1.0
+    beta0 = 0.5
+    alpha = 1.0
+    eta = 0.1
+
+    # k is mentioned to infinite in the paper
+    # set to a very large number for now
+    # will create a trunctated DP that approximates
+    # the infinite one
+    # init number of groups, will change according to the data
+    K = 5
+
+    # nr of query features
+    T = 5
+    # nr of document features
+    V = 65
+    # nr of users
+    N = 20
+    
+    prior_params = [alpha0, mu0, sigma0, T, V, beta0]
+    # args for the dummy data generator   
+    nr_docs = 100
+    nr_queries = 20
+
+    # active components (components that have observations)
+    active_components = [[] for i in range(K)]
+
+    # get some dummy data
+    docs, queries, user_q, q_doc, user_clicks = gen_dummy(nr_docs, nr_queries, N)
+
+    # gibbs sampler params
+    gibbs_iter = 20
+    thinning = 5
+    burnin = int(0.2 * gibbs_iter)
+    iter_HMC = 20
+ 
+      
+    ''' priors of the G0 '''
+    # prior means
+    mu_kt = u.random_normal(mu0, sigma0, T)
+    # prior precision
+    tau_kt = u.random_gamma(alpha0, beta0, T)
+    # prior beta_ku
+    beta_ku = u.random_normal(0, alpha0, V)
+        
+    '''   
+    # double layer of the DP
+    # needs to be done for each user
+    p2 = u.stick(eta, K)
+    theta_k = np.zeros((N, K))
+    # for all users
+    for i in range(N):
+        theta_k[i,:] = u.stick(alpha, K)
+
+    # generate the pi's
+    pis = u.DP(N, p2, theta_k)
+    '''
+
+    #print pis
+    #u.proof_check(theta_k, pis, 2)
 
 
-tot_chain = []
-for i in range(gibbs_iter):
-    print 'Doing iteration ' + str(i+1)+' ...'
-    # make this iteratively?
-    params = {}
-    active_components, gamma_k, gamma_e, theta_c, theta_e = sample_c(queries, 
-                                            user_q, eta, theta_c, theta_e, gamma_k, gamma_e, 
+    # initial gamma
+    gamma_k = u.stick(alpha, K)
+    # gamma_e auxiliary variable
+    gamma_e = 1 - np.sum(gamma_k)
+
+    # params according to the draws from the truncated DP
+    # essentially each group has its own means, variances and betas 
+    # initial parameters
+    theta_c = np.zeros((K,2*T + V))
+    # active thetas    
+    for i in range(K):
+        theta_c[i,0:T] = mu_kt.random()
+        theta_c[i, T: 2*T] = tau_kt.random()
+        theta_c[i, 2*T:] = beta_ku.random()
+
+    # theta_e auxiliary variable
+    theta_e = np.hstack((mu_kt.random(), tau_kt.random(), beta_ku.random()))
+
+    # remove queries that have no users assigned (only applicable to the dummy data)
+    for query in natsorted(queries):
+        if len([i for i in user_q if query in user_q[i]]) == 0:
+            del queries[query]    
+    
+    tot_chain = []
+    #out_q = mpc.Queue() 
+    #resultdict = {}
+    for i in range(gibbs_iter):
+        print 'Doing iteration ' + str(i+1)+' ...'
+        
+        params = {}
+        active_components, gamma_k, gamma_e, theta_c, theta_e = sample_c(queries, 
+                                            user_q, alpha, eta, theta_c, theta_e, gamma_k, gamma_e, 
                                             docs, active_components, user_clicks)
     
-    old_components = [list(component) for component in active_components]
-    params['active_components'] = old_components
+        old_components = [list(component) for component in active_components]
+        params['active_components'] = old_components
+        params['theta_e'] = np.copy(theta_e)
         
-    # since K changes locally inside the sample_c, get the new one
-    K = len(active_components)
+        
+        # since K changes locally inside the sample_c, get the new one
+        K = len(active_components)
+        
+        '''
+        # experimental
+        args_g = (active_components, gamma_k, gamma_e, alpha, eta, user_q, out_q)
+        args_t = (active_components, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, out_q)
+         
+        # define the parallel processes
+        d = mpc.Process(name='gamma_sampling', target=sample_g, args=args_g)
+        n = mpc.Process(name='theta_sampling', target=sample_theta, args=args_t)
+        
+        # start them
+        d.start()
+        n.start()
+        
+        # wait for them to finish  
+        d.join()
+        n.join()
+        
+        # parse their results
+        for i in range(2):    
+            resultdict.update(out_q.get())
+            
+        gamma_k = resultdict['gamma_k']
+        gamma_e = resultdict['gamma_e']
+        theta_c = resultdict['theta_c']
+        resultdict.clear()
+                  
+        '''
+        gamma_k, gamma_e = sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q, None)
+        theta_c = sample_theta(active_components, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, None)
+        
+        params['gamma_k'] = np.copy(gamma_k)
+        params['gamma_e'] = np.copy(gamma_e)
+        params['theta_c'] = np.copy(theta_c)
+    
+        print active_components
+        print gamma_k, gamma_e
+        print theta_c.shape
+    
+        tot_chain.append(params.copy())
 
-    gamma_k, gamma_e = sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q)
+    print
+    print 'total chain:'
+    for elem in tot_chain:
+        print elem['active_components']
+    print
     
-    old_gamma_k = np.copy(gamma_k)
-    old_gamma_e = np.copy(gamma_e)
-    params['gamma_k'] = old_gamma_k
-    params['gamma_e'] = old_gamma_e
+    # Discard first 20% of MCMC chain (burnin)
+    clean = []
+    for n in range(burnin,len(tot_chain)):
+        # thin the samples
+        if (n % thinning == 0):
+            clean.append(tot_chain[n])
 
-    theta_c = sample_theta(active_components, theta_c, queries)
-
-    theta_c = sample_weights(active_components, theta_c, queries, user_q, docs, user_clicks)
-    
-    old_theta_c = np.copy(theta_c)
-    old_theta_e = np.copy(theta_e)
-    params['theta_c'] = old_theta_c
-    params['theta_e'] = old_theta_e
-    
-    print active_components
-    print gamma_k, gamma_e
-    print theta_c.shape
-    
-    
-    tot_chain.append(params.copy())
-
-print
-print 'total chain:'
-for elem in tot_chain:
-    print elem['active_components']
-print
-    
- # Discard first 20% of MCMC chain (burnin)
-clean = []
-for n in range(burnin,len(tot_chain)):
-    # thin the samples
-    if (n % thinning == 0):
-        clean.append(tot_chain[n])
-
-print 'clean chain:'
-for elem in clean:
-    print elem['active_components']
+    print 'clean chain:'
+    for elem in clean:
+        print elem['active_components']
     
 
