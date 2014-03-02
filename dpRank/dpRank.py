@@ -154,7 +154,9 @@ def sample_c(queries, user_q, eta, theta_c, theta_e, gamma_k, gamma_e, docs, act
         # by the assign vector?
         assign /= assign.sum()
         # get a random assignment according to the assign probabilities
-        most_prob_k = np.random.choice(range(len(assign)), 1, p=assign)[0]
+        #most_prob_k = np.random.choice(range(len(assign)), 1, p=assign)[0]
+        # this is faster
+        most_prob_k = np.random.multinomial(1, assign).argmax()
         # get the most probable assignment
         #most_prob_k = assign.argmax()
         
@@ -267,7 +269,9 @@ def sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q):
                 # max one
                 #h_uik[i,j] = h_candidates.argmax() + 1
                 # random one
-                h_uik[i,j] = np.random.choice(range(m_uik[i,j])[1:], 1, p=h_candidates)[0]
+                #h_uik[i,j] = np.random.choice(range(m_uik[i,j])[1:], 1, p=h_candidates)[0]
+                # again this is faster
+                h_uik[i,j] = np.random.multinomial(1, h_candidates).argmax() + 1
     
     dir_params = np.zeros(K + 1)
     for k in range(K + 1):
@@ -277,8 +281,8 @@ def sample_g(active_components, gamma_k, gamma_e, alpha, eta, user_q):
             dir_params[k] = alpha
     
     # take the expectation or a random one from that dirichlet?
-    #g = np.random.dirichlet(dir_params)
-    g = pymc.dirichlet_expval(dir_params)
+    g = np.random.dirichlet(dir_params)
+    #g = pymc.dirichlet_expval(dir_params)
     
     gamma_k = g[:-1]
     gamma_e = g[-1]
