@@ -1,6 +1,8 @@
 import numpy as np
-from termFrequencies import dic as termFrequencies
-from userQueries import dic as userQueries
+import pickle
+
+termFrequencies = pickle.load(open('../../../termFrequencies', 'rb'))
+userQueries = pickle.load(open('../../../userQueries', 'rb'))
 
 class User:
 	vocabularySize = 0
@@ -52,3 +54,9 @@ def sim(userA, userB, minCommonTerms):
 		print "Similarity score: ", similarityScore
 
 	return  similarityScore
+
+def hoi():
+	print "Found ", len(userQueries.keys()), " users"
+	print len(termFrequencies.keys()), " users have queries"
+
+hoi()

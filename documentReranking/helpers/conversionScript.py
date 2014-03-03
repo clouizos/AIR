@@ -1,15 +1,19 @@
+import pickle
+
 from userQueries import dic as userQueries
 
-# converts a dictionary with keys:userID value:listOfQueries
-# to a dictionary with keys:userID value:[(term, termFrequency)]
-def saveCompilation(dic, filename="compiled.py"):
+def saveCompilation(dic, filename="/virdir/Scratch/data/compiled.dict"):
 	"""
 		Save dictionary to disc.
 	"""
-	f = open(filename,'w')
-	f.write("dic = " + str(dic))
-	f.close()
+	pickle.dump( dic, open( filename, "wb" ) )
 	return
+
+def loadCompilation(filename="/virdir/Scratch/data/compiled.dict"):
+	"""
+		Save dictionary to disc.
+	"""
+	return pickle.load( open( filename, "rb" ) )
 
 
 for key in userQueries.keys():
