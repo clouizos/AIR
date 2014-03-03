@@ -1,5 +1,5 @@
 import numpy as np
-from queryFrequencies import dic as queryFrequencies
+from termFrequencies import dic as termFrequencies
 from userQueries import dic as userQueries
 
 class User:
@@ -10,7 +10,7 @@ class User:
 
 	def __init__(self, userID):
 		self.queries = userQueries[userID]
-		self.termFrequencies = queryFrequencies[userID]
+		self.termFrequencies = termFrequencies[userID]
 		self.vocabularySize = len(self.termFrequencies.keys())
 		self.numberOfQueries = len(self.queries)
 
