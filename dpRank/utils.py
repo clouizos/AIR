@@ -168,6 +168,9 @@ def eval_grad_loglike_theta(theta_k, queries, component, users, user_q, click_li
     T = prior_params[3]
     beta_k = theta_k[2*T:]
     grad = 0
+    alpha0_squared = prior_params[0] ** 2
+    for i in range(theta_k.shape[0]):
+        grad += (-2 * theta_k[i])/(2 * alpha0_squared)
     for query in natsorted(component):
         for user in natsorted(users):
             # if user has that query
