@@ -14,8 +14,14 @@ class User:
 	
 	def __init__(self, userID, numberOfMostSimilarUsers):
 		print "initialize user with userID", userID
-		self.userID = 0
+		self.userID = userID
+
+		# implement
+		self.queries = []
+		self.clickedDocuments = []
+
 		self.similarUsersRankedList = self.mostSimilarUsers(numberOfMostSimilarUsers)
+
 
 	# needs to be implemented according to sim(a, b)
 	# returns a list of size 'numberOfMostSimilarUsers' with users that are most similar
