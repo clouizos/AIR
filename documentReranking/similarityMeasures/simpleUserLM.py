@@ -42,7 +42,7 @@ def sim(userA, userB, minCommonTerms):
 	# create two user objects
 	A = User(userA)
 	B = User(userB)
-	similarityScore = -9999999999
+	similarityScore = 0
 
 	# check if they have minCommonTerms terms in common
 	# if not, return 0
@@ -51,6 +51,8 @@ def sim(userA, userB, minCommonTerms):
 		for query in A.queries:
 			similarityScore += B.p_q_u(query)
 		similarityScore = similarityScore / A.numberOfQueries
+	else:
+		similarityScore = -9999
 
 	return  similarityScore
 
