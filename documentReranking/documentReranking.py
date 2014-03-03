@@ -1,9 +1,10 @@
 # documentReranking
 # Created by Anouk Visser (27-02-2014)
 
-
 # I'm not sure about the design of this file...
 # This is just one big user class, which is kind of fun, but maybe not completely useful. 
+
+import similarityMeasures
 
 class User:
 	
@@ -53,6 +54,7 @@ class User:
 		# loop over the simmilarUsers
 			# rankingScore += self.sim(similarUser) * similarUser.didClickDocument(document, query, similarUser)
 		return 0
+
 
 
 
