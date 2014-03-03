@@ -65,8 +65,10 @@ def hoi():
 	for userB in termFrequencies.keys():
 		if userB != userA:
 			similarity = sim(userA, userB, 5)
-			if similarityScore > bestMatch:
-				bestMatch = similarityScore
+			print "User: ", userA, " and User: ", userB, " have similarity ", similarity
+			if similarity > bestMatch:
+				print "Best match!"
+				bestMatch = similarity
 				bestUser = userB
 
 	print "Best matching score: ", bestMatch
