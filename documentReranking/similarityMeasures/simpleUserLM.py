@@ -90,7 +90,7 @@ def hoi():
 		bestUser = 0
 		for userB in termFrequencies.keys():
 			if userB != userA:
-				similarity = sim(userA, userB, 5)
+				similarity = mutualSim(userA, userB, 5)
 				if similarity > bestMatch:
 					bestMatch = similarity
 					bestUser = userB
