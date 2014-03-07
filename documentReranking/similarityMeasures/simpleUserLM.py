@@ -1,11 +1,5 @@
-import numpy as np
-import pickle
+# I'm feeling it's not so good to rely on the termfrequencies in the user class...
 import user as user 
-
-termFrequencies = pickle.load(open('../../../termFrequencies', 'rb'))
-userQueries = pickle.load(open('../../../userQueries', 'rb'))
-
-
 
 def sim(userA, userB, minCommonTerms):
 	# create two user objects
@@ -31,7 +25,6 @@ def mutualSim(userA, userB, minCommonTerms):
 	similarityScoreAB = 0
 	similarityScoreBA = 0
 
-
 	# check if they have minCommonTerms terms in common
 	# if not, return 0
 	if A.termsInCommon(B) > minCommonTerms:
@@ -43,7 +36,6 @@ def mutualSim(userA, userB, minCommonTerms):
 		for query in B.queries:
 			similarityScoreBA += A.p_q_u(query)
 		similarityScoreBA = similarityScoreBA / B.numberOfQueries
-
 	else:
 		similarityScoreAB = -9999
 
