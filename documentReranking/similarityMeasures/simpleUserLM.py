@@ -69,10 +69,14 @@ def hoi():
 				if similarity > bestMatch:
 					bestMatch = similarity
 					bestUser = userB
-		print
-		print "Best matching score: ", bestMatch
-		print "Term frequencies: ", userA.queries
-		print "Best matching user: ", bestUser.queries
+		if bestUser != 0:
+			print
+			print "Best matching score: ", bestMatch
+			print "Term frequencies: ", userA.queries
+			print "Best matching user: ", bestUser.queries
+		else:
+			print 
+			print "No best match!"
 
 
 
