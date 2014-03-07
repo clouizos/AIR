@@ -75,10 +75,10 @@ def mutualSim(userA, userB, minCommonTerms):
 			similarityScoreBA += A.p_q_u(query)
 		similarityScoreBA = similarityScoreBA / B.numberOfQueries
 
-		print similarityScoreAB, similarityScoreBA
-
 	else:
 		similarityScoreAB = -9999
+
+	return similarityScoreAB * similarityScoreBA
 
 
 def hoi():
@@ -96,9 +96,9 @@ def hoi():
 					bestUser = userB
 		if bestUser != 0:
 			print
-			# print "Best matching score: ", bestMatch
-			# print "Term frequencies: ", User(userA).queries
-			# print "Best matching user: ", User(bestUser).queries
+			print "Best matching score: ", bestMatch
+			print "Queries user A: ", User(userA).queries
+			print "Queries user B: ", User(bestUser).queries
 			print "#queries A: ", len(User(userA).queries)
 			print "#queries B: ", len(User(userB).queries)
 		else:
