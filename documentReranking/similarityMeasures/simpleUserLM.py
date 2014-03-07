@@ -72,8 +72,8 @@ def hoi():
 		if bestUser != 0:
 			print
 			print "Best matching score: ", bestMatch
-			print "Term frequencies: ", userA.queries
-			print "Best matching user: ", bestUser.queries
+			print "Term frequencies: ", User(userA).queries
+			print "Best matching user: ", User(bestUser).queries
 		else:
 			print 
 			print "No best match!"
