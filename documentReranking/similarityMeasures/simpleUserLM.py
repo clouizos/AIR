@@ -1,6 +1,6 @@
 import numpy as np
 import pickle
-import user 
+import user as user 
 
 termFrequencies = pickle.load(open('../../../termFrequencies', 'rb'))
 userQueries = pickle.load(open('../../../userQueries', 'rb'))
@@ -9,8 +9,8 @@ userQueries = pickle.load(open('../../../userQueries', 'rb'))
 
 def sim(userA, userB, minCommonTerms):
 	# create two user objects
-	A = User(userA)
-	B = User(userB)
+	A = user.User(userA)
+	B = user.User(userB)
 	similarityScore = 0
 
 	# check if they have minCommonTerms terms in common
@@ -26,8 +26,8 @@ def sim(userA, userB, minCommonTerms):
 	return  similarityScore
 
 def mutualSim(userA, userB, minCommonTerms):
-	A = User(userA)
-	B = User(userB)
+	A = user.User(userA)
+	B = user.User(userB)
 	similarityScoreAB = 0
 	similarityScoreBA = 0
 
@@ -66,10 +66,10 @@ def hoi():
 		if bestUser != 0:
 			print
 			print "Best matching score: ", bestMatch
-			print "Queries user A: ", User(userA).queries
-			print "Queries user B: ", User(bestUser).queries
-			print "#queries A: ", len(User(userA).queries)
-			print "#queries B: ", len(User(bestUser).queries)
+			print "Queries user A: ", user.User(userA).queries
+			print "Queries user B: ", user.User(bestUser).queries
+			print "#queries A: ", len(user.User(userA).queries)
+			print "#queries B: ", len(user.User(bestUser).queries)
 		else:
 			print 
 			print "No best match!"
