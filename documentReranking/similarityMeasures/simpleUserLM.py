@@ -13,7 +13,7 @@ class User:
 	def __init__(self, userID):
 		self.queries = userQueries[userID]
 		self.termFrequencies = termFrequencies[userID]
-		self.vocabularySize = len(self.termFrequencies.keys())
+		self.vocabularySize = sum(self.termFrequencies.values())
 		self.numberOfQueries = len(self.queries)
 
 	# this method has very simple smoothing by +1
