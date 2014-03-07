@@ -133,8 +133,13 @@ def pair_pref(beta_c, doc_i, doc_j):
 
 # gradient of eq.1 of the paper (needed for HMC)
 def grad_pair_pref(beta_c, doc_i, doc_j):
-    return (1/(1 + np.exp(- np.dot(beta_c.T, doc_i - doc_j )))) * \
-                    ((doc_i - doc_j) * np.exp(np.dot(-beta_c.T, doc_i - doc_j)))
+    grad = np.asfarray([(1/(1 + np.exp(- beta_c[i] * (doc_i[i] - doc_j[i]))))
+            * (1 - (1/(1 + np.exp(- beta_c[i] * (doc_i[i] - doc_j[i])))))
+            * (doc_i[i] - doc_j[i])
+            for i in xrange(beta_c.shape[0])])
+
+    return grad
+
 
 # queries are the queries of a given group k
 # beta_k, mu_k, sigma_k are the parameters of the group k
@@ -169,10 +174,10 @@ def eval_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click
 def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click_list, docs, prior_params):
     #T = prior_params[3]
     #beta_k = theta_k[2*T:]
-    grad = 0
+    grad = np.zeros(beta_k.shape[0])
     alpha0_squared = prior_params[0] ** 2
     for i in range(beta_k.shape[0]):
-        grad += (-2 * beta_k[i])/(2 * alpha0_squared)
+        grad[i] = -beta_k[i]/alpha0_squared
     for query in natsorted(component):
         for user in natsorted(users):
             # if user has that query
@@ -189,14 +194,14 @@ def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, 
                 # for each element find the pairwise ranking preferences
 
                 for elem in comb:
-                    #args = [docs[user_specific_click_list[elem[0]][0]], docs[user_specific_click_list[elem[1]][0]]]
-                    #print 'check: ' + str(check_grad(pair_pref, grad_pair_pref, beta_k, *args))
+                    # args = [docs[user_specific_click_list[elem[0]][0]], docs[user_specific_click_list[elem[1]][0]]]
+                    # print 'check: ' + str(check_grad(pair_pref, grad_pair_pref, beta_k, *args))
 
                     pair_prefs.append(grad_pair_pref(beta_k, docs[user_specific_click_list[elem[0]][0]], docs[user_specific_click_list[elem[1]][0]]))
 
                 # if there was such a combination
                 if len(pair_prefs) >= 1:
-                    grad += np.sum(pair_prefs)
+                    grad += np.sum(pair_prefs, axis = 0)
 
     return grad
 
@@ -212,9 +217,9 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
     args = [theta_k, queries, component, users, user_q, user_clicks, docs, prior_params]
 
     # TODO : check the gradients again, the check_grad measurements seem to be off
-    #print 'grad correction: ' + str(check_grad(eval_loglike_theta,
-    #                                      eval_grad_loglike_theta,
-    #                                      beta_k, *args))
+    # print 'grad correction: ' + str(check_grad(eval_loglike_theta,
+    #                                       eval_grad_loglike_theta,
+    #                                       beta_k, *args))
 
     for i in range(iterations):
         old_theta_k = chain[len(chain) - 1]
