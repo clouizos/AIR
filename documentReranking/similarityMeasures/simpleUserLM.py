@@ -1,5 +1,6 @@
 # I'm feeling it's not so good to rely on the termfrequencies in the user class...
 import user as user 
+import pickle
 
 termFrequencies = pickle.load(open('../../../termFrequencies', 'rb'))
 userQueries = pickle.load(open('../../../userQueries', 'rb'))
