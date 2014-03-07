@@ -78,7 +78,7 @@ def mutualSim(userA, userB, minCommonTerms):
 	else:
 		similarityScoreAB = -9999
 
-	return similarityScoreAB * similarityScoreBA
+	return similarityScoreAB + similarityScoreBA
 
 
 def hoi():
