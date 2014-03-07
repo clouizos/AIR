@@ -56,6 +56,31 @@ def sim(userA, userB, minCommonTerms):
 
 	return  similarityScore
 
+def mutualSim(userA, userB, minCommonTerms):
+	A = User(userA)
+	B = User(userB)
+	similarityScoreAB = 0
+	similarityScoreBA = 0
+
+
+	# check if they have minCommonTerms terms in common
+	# if not, return 0
+	if A.termsInCommon(B) > minCommonTerms:
+		# calculate the similarity A -> B
+		for query in A.queries:
+			similarityScoreAB += B.p_q_u(query)
+		similarityScoreAB = similarityScoreAB / A.numberOfQueries
+
+		for query in B.queries:
+			similarityScoreBA += A.p_q_u(query)
+		similarityScoreBA = similarityScoreBA / B.numberOfQueries
+
+		print similarityScoreAB, similarityScoreBA
+
+	else:
+		similarityScoreAB = -9999
+
+
 def hoi():
 	print "Found ", len(userQueries.keys()), " users"
 	print len(termFrequencies.keys()), " users have queries"
