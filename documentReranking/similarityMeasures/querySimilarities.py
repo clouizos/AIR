@@ -23,3 +23,9 @@ def levenshtein(s1, s2):
 
 	return previous_row[-1]
 
+# will return the list of clicked documents the queries have in common
+# this can be seen as 'query intent', as the documents were relevant to the query
+# and fullfill its intent
+def clicksOnDocument():
+
+	return 0
