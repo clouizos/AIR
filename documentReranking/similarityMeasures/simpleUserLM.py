@@ -59,21 +59,21 @@ def sim(userA, userB, minCommonTerms):
 def hoi():
 	print "Found ", len(userQueries.keys()), " users"
 	print len(termFrequencies.keys()), " users have queries"
-	userA = 'UID839'
 
-	bestMatch = -9999
-	bestUser = 0
-	for userB in termFrequencies.keys():
-		if userB != userA:
-			similarity = sim(userA, userB, 5)
-			print "User: ", userA, " and User: ", userB, " have similarity ", similarity
-			if similarity > bestMatch:
-				print "Best match!"
-				bestMatch = similarity
-				bestUser = userB
+	for userA in termFrequencies.keys():
+		bestMatch = -9999
+		bestUser = 0
+		for userB in termFrequencies.keys():
+			if userB != userA:
+				similarity = sim(userA, userB, 5)
+				print "User: ", userA, " and User: ", userB, " have similarity ", similarity
+				if similarity > bestMatch:
+					print "Best match!"
+					bestMatch = similarity
+					bestUser = userB
 
-	print "Best matching score: ", bestMatch
-	print "Best matching user: ", bestUser
+		print "Best matching score: ", bestMatch
+		print "Best matching user: ", bestUser
 
 
 
