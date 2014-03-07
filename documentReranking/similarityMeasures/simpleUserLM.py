@@ -71,7 +71,9 @@ def hoi():
 					bestUser = userB
 		print
 		print "Best matching score: ", bestMatch
-		print "Best matching user: ", bestUser
+		print "Term frequencies: ", userA.queries
+		print "Best matching user: ", bestUser.queries
+
 
 
 
