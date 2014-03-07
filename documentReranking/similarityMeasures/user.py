@@ -1,3 +1,10 @@
+import numpy as np
+import pickle
+
+termFrequencies = pickle.load(open('../../../termFrequencies', 'rb'))
+userQueries = pickle.load(open('../../../userQueries', 'rb'))
+
+
 class User:
 	vocabularySize = 0
 	queries = []
