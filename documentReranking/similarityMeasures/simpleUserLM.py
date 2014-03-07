@@ -100,7 +100,7 @@ def hoi():
 			print "Queries user A: ", User(userA).queries
 			print "Queries user B: ", User(bestUser).queries
 			print "#queries A: ", len(User(userA).queries)
-			print "#queries B: ", len(User(userB).queries)
+			print "#queries B: ", len(User(bestUser).queries)
 		else:
 			print 
 			print "No best match!"
