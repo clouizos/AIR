@@ -44,9 +44,14 @@ def loadFile(folder, kind, qids = None, q = None):
 def get_letor_3(total_features, nr_rel_docs = 30, reference_feature = 24):
 
     data_total = np.zeros((1,2*total_features))
+
+    data_label_dic = {}
+    data_features = np.zeros((1, total_features))
+    data_labels = np.zeros(1)
+
     for i in range(1,7):
         #folder = '~/VariousDATA/OHSUMED/QueryLevelNorm/Fold{}/'.format(i)
-        folder = '~/VariousDATA/TestClustering/Fold{}/'.format(i)
+        folder ='~/VariousDATA/TestClustering/Fold{}/'.format(i)
         print 'Parsing Fold{}'.format(i)+'...'
 
         # load qids to be clustered
@@ -61,6 +66,10 @@ def get_letor_3(total_features, nr_rel_docs = 30, reference_feature = 24):
         cnt = 0
         for q in natsorted(data_per_q.keys()):
             ranking_feat = np.asfarray(data_per_q[q])
+            data_features = np.vstack((data_features, ranking_feat))
+            data_labels = np.hstack((data_labels, relevance_per_q[q]))
+            print data_features.shape
+            print data_labels.shape
             sortedarray = np.argsort(ranking_feat[:, reference_feature])[::-1]
             useful = ranking_feat[sortedarray[0:nr_rel_docs],:]
             data[cnt] = np.hstack((np.mean(useful, axis = 0), np.std(useful, axis = 0) **2))
@@ -73,9 +82,13 @@ def get_letor_3(total_features, nr_rel_docs = 30, reference_feature = 24):
 
     # remove the first dummy line
     data_total = data_total[1:,:]
-    print data_total.shape
+    data_label_dic['data'] = data_features[1:, :]
+    data_label_dic['labels'] = data_labels[1:]
+
     with open('data_cluster.pickle', 'wb') as handle:
         pickle.dump(data_total, handle)
+    with open('data_label.pickle', 'wb') as handle:
+        pickle.dump(data_label_dic, handle)
 
 def load_pickle(path, filename):
     with open(path+filename, 'rb') as handle:
