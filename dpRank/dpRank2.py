@@ -318,10 +318,10 @@ if __name__ == '__main__':
     docs, queries, user_q, q_doc, user_clicks = gen_dummy(nr_docs, nr_queries, N, groups)
 
     # gibbs sampler params
-    gibbs_iter = 1000
+    gibbs_iter = 5
     thinning = 5
     burnin = int(0.2 * gibbs_iter)
-    iter_HMC = 50
+    iter_HMC = 2
 
     ''' priors of the G0 '''
     # prior means
@@ -366,8 +366,8 @@ if __name__ == '__main__':
 
 
     tot_chain = []
-    out_q = mpc.Queue()
-    resultdict = {}
+    #out_q = mpc.Queue()
+    #resultdict = {}
 
     for i in range(gibbs_iter):
         print 'Doing iteration %i ... ' % (i + 1)
@@ -390,33 +390,33 @@ if __name__ == '__main__':
         K = theta_c.shape[0]
 
         # experimental
-        args_g = (users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q)
-        args_t = (users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, out_q)
+        # args_g = (users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q)
+        # args_t = (users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, out_q)
 
-        # define the parallel processes
-        d = mpc.Process(name='gamma_sampling', target=sample_g, args=args_g)
-        n = mpc.Process(name='theta_sampling', target=sample_theta, args=args_t)
+        # # define the parallel processes
+        # d = mpc.Process(name='gamma_sampling', target=sample_g, args=args_g)
+        # n = mpc.Process(name='theta_sampling', target=sample_theta, args=args_t)
 
-        # start them
-        d.start()
-        n.start()
+        # # start them
+        # d.start()
+        # n.start()
 
-        # wait for them to finish
-        d.join()
-        n.join()
+        # # wait for them to finish
+        # d.join()
+        # n.join()
 
-        # parse their results
-        for i in range(2):
-            resultdict.update(out_q.get())
+        # # parse their results
+        # for i in range(2):
+        #     resultdict.update(out_q.get())
 
-        gamma_k = resultdict['gamma_k']
-        gamma_e = resultdict['gamma_e']
-        theta_c = resultdict['theta_c']
-        resultdict.clear()
+        # gamma_k = resultdict['gamma_k']
+        # gamma_e = resultdict['gamma_e']
+        # theta_c = resultdict['theta_c']
+        # resultdict.clear()
 
 
-        #gamma_k, gamma_e = sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q)
-        #theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC)
+        gamma_k, gamma_e = sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q)
+        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC)
 
         params['gamma_k'] = np.copy(gamma_k)
         params['gamma_e'] = np.copy(gamma_e)
