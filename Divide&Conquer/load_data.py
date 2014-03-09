@@ -43,11 +43,14 @@ def loadFile(folder, kind, qids = None, q = None):
 # reference_feature 24 is bm25
 def get_letor_3(total_features, nr_rel_docs = 30, reference_feature = 24):
 
-    data_total = np.zeros((1,2*total_features))
+    # data_total = np.zeros((1,2*total_features))
 
-    data_label_dic = {}
-    data_features = np.zeros((1, total_features))
-    data_labels = np.zeros(1)
+    # data_label_dic = {}
+    # data_features = np.zeros((1, total_features))
+    # data_labels = np.zeros(1)
+
+    data_per_q_total = {}
+    relevance_per_q_total = {}
 
     for i in range(1,7):
         #folder = '~/VariousDATA/OHSUMED/QueryLevelNorm/Fold{}/'.format(i)
@@ -62,36 +65,52 @@ def get_letor_3(total_features, nr_rel_docs = 30, reference_feature = 24):
         for q in qids_dum:
             data_per_q[q], relevance_per_q[q] = loadFile(folder, 'vali', None, q)
 
-        data = np.zeros((len(data_per_q.keys()), 2*total_features))
-        cnt = 0
-        for q in natsorted(data_per_q.keys()):
-            ranking_feat = np.asfarray(data_per_q[q])
-            data_features = np.vstack((data_features, ranking_feat))
-            data_labels = np.hstack((data_labels, relevance_per_q[q]))
-            print data_features.shape
-            print data_labels.shape
-            sortedarray = np.argsort(ranking_feat[:, reference_feature])[::-1]
-            useful = ranking_feat[sortedarray[0:nr_rel_docs],:]
-            data[cnt] = np.hstack((np.mean(useful, axis = 0), np.std(useful, axis = 0) **2))
-            cnt += 1
+        data_per_q_total.update(data_per_q)
+        relevance_per_q_total.update(relevance_per_q)
 
-        print data.shape
-        data_total = np.vstack((data_total, data))
-        data_per_q.clear()
-        relevance_per_q.clear()
+    #     data = np.zeros((len(data_per_q.keys()), 2*total_features))
+    #     cnt = 0
+    #     for q in natsorted(data_per_q.keys()):
+    #         ranking_feat = np.asfarray(data_per_q[q])
+    #         data_features = np.vstack((data_features, ranking_feat))
+    #         data_labels = np.hstack((data_labels, relevance_per_q[q]))
+    #         #print data_features.shape
+    #         #print data_labels.shape
+    #         sortedarray = np.argsort(ranking_feat[:, reference_feature])[::-1]
+    #         useful = ranking_feat[sortedarray[0:nr_rel_docs],:]
+    #         data[cnt] = np.hstack((np.mean(useful, axis = 0), np.std(useful, axis = 0) **2))
+    #         cnt += 1
 
-    # remove the first dummy line
-    data_total = data_total[1:,:]
-    data_label_dic['data'] = data_features[1:, :]
-    data_label_dic['labels'] = data_labels[1:]
+    #     #print data.shape
+    #     data_total = np.vstack((data_total, data))
+    #     data_per_q.clear()
+    #     relevance_per_q.clear()
 
-    with open('data_cluster.pickle', 'wb') as handle:
-        pickle.dump(data_total, handle)
-    with open('data_label.pickle', 'wb') as handle:
-        pickle.dump(data_label_dic, handle)
+    # # remove the first dummy line
+    # data_total = data_total[1:,:]
+    # data_label_dic['data'] = data_features[1:, :]
+    # data_label_dic['labels'] = data_labels[1:]
+
+    # with open('data_cluster.pickle', 'wb') as handle:
+    #     pickle.dump(data_total, handle)
+    # with open('data_label.pickle', 'wb') as handle:
+    #     pickle.dump(data_label_dic, handle)
+    with open('data_per_q_total.pickle', 'wb') as handle:
+        pickle.dump(data_per_q_total, handle)
+    with open('relevance_per_q_total.pickle', 'wb') as handle:
+        pickle.dump(relevance_per_q_total, handle)
+
+    print 'Parsing done.'
 
 def load_pickle(path, filename):
     with open(path+filename, 'rb') as handle:
         data = pickle.load(handle)
     return data
 
+def load_pickle_total(path, filename1, filename2):
+    with open(path+filename1, 'rb') as handle:
+        data = pickle.load(handle)
+    with open(path+filename2, 'rb') as handle:
+        labels = pickle.load(handle)
+
+    return data, labels
