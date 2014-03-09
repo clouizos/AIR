@@ -2,7 +2,10 @@
 import user as user 
 import pickle
 
+print "Importing term frequences..."
 termFrequencies = pickle.load(open('../../../termFrequencies', 'rb'))
+
+print "Importing user queries..."
 userQueries = pickle.load(open('../../../userQueries', 'rb'))
 
 
@@ -35,6 +38,7 @@ def mutualSim(userA, userB, minCommonTerms):
 	if A.termsInCommon(B) > minCommonTerms:
 		# calculate the similarity A -> B
 		for query in A.queries:
+			# !! not very efficient since users are expected to have many duplicate queries... 
 			similarityScoreAB += B.p_q_u(query)
 		similarityScoreAB = similarityScoreAB / A.numberOfQueries
 
