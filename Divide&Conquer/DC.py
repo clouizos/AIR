@@ -94,6 +94,7 @@ def estimate_cluster_prob(test_dis, dpgmm, clusters):
         estimates[i, :] = tot_probs
     return estimates
 
+# find the predicted rankings from each classifier
 def predict_ensemble(ensemble, dics, estimates, test, dataq):
     # dict containing a list of predictions from each classifier
     # indexed by the query string
@@ -112,73 +113,96 @@ def predict_ensemble(ensemble, dics, estimates, test, dataq):
         predictions_per_q[q] = predictions
     return predictions_per_q
 
+# aggregate the results and produce the final ranking
+def find_final_ranking(predictions_per_q):
+    ranked_list_per_q = {}
+    for q in predictions_per_q:
+        rankings = []
+        # get all the predictions
+        predictions = np.asarray(predictions_per_q[q])
+        # the unique ones are the documents
+        docs = np.unique(predictions)
+        for doc in docs:
+            # find the index of the document in the prediction
+            pred_ranks = np.where(predictions == doc)[1]
+            # just average the indices from all the predictions
+            new_rank = int(np.sum(pred_ranks)/pred_ranks.shape[0])
+            # this is the new rank of the document
+            rankings.append((doc, new_rank))
+        # sort the list in place
+        rankings.sort(key=lambda tup: tup[1])
+        ranked_list_per_q[q] = rankings
+    return ranked_list_per_q
 
 
-#ld.get_letor_3(64)
-#data_total_raw = ld.load_pickle('','data_cluster.pickle')
+if __name__ == '__main__':
+    #ld.get_letor_3(64)
+    #data_total_raw = ld.load_pickle('','data_cluster.pickle')
 
-data, labels = ld.load_pickle_total('', 'data_per_q_total.pickle', 'relevance_per_q_total.pickle')
+    data, labels = ld.load_pickle_total('', 'data_per_q_total.pickle', 'relevance_per_q_total.pickle')
 
-queries = np.asanyarray(natsorted(data.keys()), dtype=object)
+    queries = np.asanyarray(natsorted(data.keys()), dtype=object)
 
-train, test = train_test_split(queries, test_size=0.33, random_state=42)
-print 'Training set size: %i, Testing set size: %i' % (train.shape[0], test.shape[0])
+    train, test = train_test_split(queries, test_size=0.33, random_state=42)
+    print 'Training set size: %i, Testing set size: %i' % (train.shape[0], test.shape[0])
 
-data_cluster_train = query_features(train, 24, 50, 64, data)
-data_cluster_test = query_features(test, 24, 50, 64, data)
+    data_cluster_train = query_features(train, 24, 50, 64, data)
+    data_cluster_test = query_features(test, 24, 50, 64, data)
 
-data_cluster_train_ds = sc.pdist(data_cluster_train, 'mahalanobis')
-data_cluster_train_ds = sc.squareform(data_cluster_train_ds)
+    data_cluster_train_ds = sc.pdist(data_cluster_train, 'mahalanobis')
+    data_cluster_train_ds = sc.squareform(data_cluster_train_ds)
 
-plt.figure(1)
-plt.imshow(data_cluster_train_ds)
-plt.colorbar()
-plt.title('Initial dissimilarity')
+    plt.figure(1)
+    plt.imshow(data_cluster_train_ds)
+    plt.colorbar()
+    plt.title('Initial dissimilarity')
 
-dpgmm = DPGMM(covariance_type='diag', alpha=2.0, n_iter=1000, n_components=10)
-dpgmm.fit(data_cluster_train_ds)
-prediction = dpgmm.predict(data_cluster_train_ds)
-clusters = np.unique(prediction)
+    dpgmm = DPGMM(covariance_type='diag', alpha=2.0, n_iter=1000, n_components=10)
+    dpgmm.fit(data_cluster_train_ds)
+    prediction = dpgmm.predict(data_cluster_train_ds)
+    clusters = np.unique(prediction)
 
-print 'Found %i clusters!' % clusters.shape[0]
-print clusters
+    print 'Found %i clusters!' % clusters.shape[0]
+    print clusters
 
-# create the reordered input data according to the clusters
-data_cluster = np.zeros((1, data_cluster_train.shape[1]))
-each_cluster = []
-for i in xrange(clusters.shape[0]):
-    cluster = data_cluster_train[prediction == clusters[i],:]
-    each_cluster.append(np.where(prediction == clusters[i])[0])
-    data_cluster = np.vstack((data_cluster, cluster))
+    # create the reordered input data according to the clusters
+    data_cluster = np.zeros((1, data_cluster_train.shape[1]))
+    each_cluster = []
+    for i in xrange(clusters.shape[0]):
+        cluster = data_cluster_train[prediction == clusters[i],:]
+        each_cluster.append(np.where(prediction == clusters[i])[0])
+        data_cluster = np.vstack((data_cluster, cluster))
 
-# remove the useless first element
-data_cluster = data_cluster[1:, :]
+    # remove the useless first element
+    data_cluster = data_cluster[1:, :]
 
-# visuallize the clustering, it should be a block matrix
-data_vis = sc.pdist(data_cluster, 'mahalanobis')
-data_vis = sc.squareform(data_vis)
-plt.figure(2)
-plt.imshow(data_vis)
-plt.colorbar()
-plt.title('Clustered dissimilarity')
-plt.show()
+    # visuallize the clustering, it should be a block matrix
+    data_vis = sc.pdist(data_cluster, 'mahalanobis')
+    data_vis = sc.squareform(data_vis)
+    plt.figure(2)
+    plt.imshow(data_vis)
+    plt.colorbar()
+    plt.title('Clustered dissimilarity')
+    plt.show()
 
-test_dis = parse_test_dis(data_cluster_train, data_cluster_test)
-estimates = estimate_cluster_prob(test_dis, dpgmm, clusters)
+    test_dis = parse_test_dis(data_cluster_train, data_cluster_test)
+    estimates = estimate_cluster_prob(test_dis, dpgmm, clusters)
 
-print test_dis.shape
-print estimates.shape
+    print test_dis.shape
+    print estimates.shape
 
-# here we will create a sparse coding representation
-# for each cluster
-dics = create_dics(each_cluster, data, train)
-
-
-# train the ensemble according to those dictionaries
-ensemble = train_ensemble(each_cluster, data, labels, train, dics)
-
-predictions_per_q = predict_ensemble(ensemble, dics, estimates, test, data)
+    # here we will create a sparse coding representation
+    # for each cluster
+    dics = create_dics(each_cluster, data, train)
 
 
+    # train the ensemble according to those dictionaries
+    ensemble = train_ensemble(each_cluster, data, labels, train, dics)
 
+    # prediction for the testing queries
+    predictions_per_q = predict_ensemble(ensemble, dics, estimates, test, data)
 
+    # aggregate the results to get the final rankings
+    ranked_list_per_q = find_final_ranking(predictions_per_q)
+
+    # insert evaluation code here
