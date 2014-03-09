@@ -1,5 +1,5 @@
 # here I will define some query similartiy measures
-
+import pickle
 print "Loading queries..."
 queries = pickle.load(open('../../../queries', 'rb'))['queries']
 
@@ -33,3 +33,17 @@ def clicksOnDocument():
 	return 0
 
 def test():
+	for q1 in queries:
+		bestMatch = 0
+		bestScore  = 100000
+		for q2 in queries:
+			if q1 != q2:
+				score = levenshtein(q1, q2)
+				if score < bestScore:
+					bestMatch = q2
+					bestScore = score
+		print "Evaluated q1: ", q1
+		print "Best match: ", bestMatch, " with score: ", bestScore, "\n"
+
+
+test()
