@@ -134,6 +134,21 @@ def find_final_ranking(predictions_per_q):
         ranked_list_per_q[q] = rankings
     return ranked_list_per_q
 
+def dcg(preds, k):
+    return np.sum([preds[i]/np.log2(i+2) for i in range(0,k)])
+
+def get_ndcg(ranked_list_per_q, labelsq, rel_k):
+    ndcg = np.zeros(len(rel_k))
+    for q in ranked_list_per_q:
+        rankings = ranked_list_per_q[q]
+        labels = labelsq[q]
+        ideal_labels = np.sort(labels)[::-1]
+        ranked_labels = labels[rankings[:]]
+        for i in xrange(len(rel_k)):
+            ideal_dcg = dcg(ideal_labels, rel_k[i])
+            dcg_q = dcg(ranked_labels, rel_k[i])
+            ndcg[i] += dcg_q/ideal_dcg
+    return ndcg
 
 if __name__ == '__main__':
     #ld.get_letor_3(64)
@@ -205,4 +220,8 @@ if __name__ == '__main__':
     # aggregate the results to get the final rankings
     ranked_list_per_q = find_final_ranking(predictions_per_q)
 
-    # insert evaluation code here
+    # get the total ndcg at rel_k places
+    rel_k = [1,2,3,5,10]
+    ndcg = get_ndcg(ranked_list_per_q, labels, rel_k)
+
+    print ndcg
