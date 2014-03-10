@@ -8,7 +8,3 @@ class Query:
 	def __init__(self, q):
 		self.query = q
 		self.length = len(self.query)
-
-def test():
-	for 
-

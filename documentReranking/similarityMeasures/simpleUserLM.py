@@ -3,10 +3,10 @@ import user as user
 import pickle
 
 print "Importing term frequences..."
-termFrequencies = pickle.load(open('../../../termFrequencies', 'rb'))
+termFrequencies = pickle.load(open('../../../termFrequencies_strict', 'rb'))
 
 print "Importing user queries..."
-userQueries = pickle.load(open('../../../userQueries', 'rb'))
+userQueries = pickle.load(open('../../../userQueries_strict', 'rb'))
 
 
 def sim(userA, userB, minCommonTerms):
