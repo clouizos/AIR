@@ -139,8 +139,8 @@ def test3():
 		if bestUser != 0:
 			print
 			print "Best matching score: ", bestMatch
-			print "Queries user A: ", userExtended.UserLMExtended(userA).queries
-			print "Queries user B: ", userExtended.UserLMExtended(bestUser).queries
+			print "Queries user A: ", set(userExtended.UserLMExtended(userA).queries)
+			print "Queries user B: ", set(userExtended.UserLMExtended(bestUser).queries)
 			print "#queries A: ", len(userExtended.UserLMExtended(userA).queries)
 			print "#queries B: ", len(userExtended.UserLMExtended(bestUser).queries)
 		else:
