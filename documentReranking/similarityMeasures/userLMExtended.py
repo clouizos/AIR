@@ -30,7 +30,7 @@ class UserLMExtended:
 
 	def getClickedDocuments(self):
 		clicks = set()
-		userInfo = userQueriesAndClicks_strict[userID]
+		userInfo = userQueriesAndClicks_strict[self.id]
 		for infoTriplet in userInfo:
 			c = infoTriplet[1]
 			for d in c:
