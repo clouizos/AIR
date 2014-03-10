@@ -13,27 +13,26 @@ class UserLMExtended:
 	termFrequencies = 0
 	clickedDocuments = 0
 	vocabularySize = 0
+	queries = 0
+	numberOfQueries = 0
 
 	def __init__(self, userID):
 		self.id = userID
 
 		# first extract termFrequnecies from the indexed file
 		self.termFrequencies = termFrequencies[userID]
-		# finally get vocabularySize
-		self.vocabularySize = sum(self.termFrequencies.values())
 		
 		# get clickedDocuments
 		self.clickedDocuments = self.getClickedDocuments()
 
-		print "# of unique terms ", len(self.termFrequencies.keys())
-
 		# update term frequencies
 		self.termFrequencies = self.updateTermFrequencies()
 
-		print "# of unique terms after update", len(self.termFrequencies.keys())
-
 		# finally get vocabularySize
 		self.vocabularySize = sum(self.termFrequencies.values())
+
+		self.queries = userQueries[self.id]
+		self.numberOfQueries = len(self.queries)
 		
 	def getClickedDocuments(self):
 		clicks = set()
@@ -56,7 +55,6 @@ class UserLMExtended:
 					else:
 						updatedTermFrequencies[term] = 1
 		return updatedTermFrequencies
-
 
 	# this method has very simple smoothing by +1
 	def getTermFrequency(self, term):

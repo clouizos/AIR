@@ -53,12 +53,26 @@ def mutualSim(userA, userB, minCommonTerms):
 	return similarityScoreAB + similarityScoreBA
 
 def simExtended(userA, userB, minCommonTerms):
+	# create two user objects
+	A = userExtended.UserLMExtended(userA)
 	B = userExtended.UserLMExtended(userB)
+	similarityScore = 0
 
-	return 0
+	# check if they have minCommonTerms terms in common
+	# if not, return 0
+	if A.termsInCommon(B) > minCommonTerms:
+		# calculate the similarity
+		for query in A.queries:
+			similarityScore += B.p_q_u(query)
+		similarityScore = similarityScore / A.numberOfQueries
+	else:
+		similarityScore = -9999
+
+	return  similarityScore
 
 
 def test1():
+	print "Testing sim"
 	print "Found ", len(userQueries.keys()), " users"
 	print len(termFrequencies.keys()), " users have queries"
 
@@ -83,6 +97,7 @@ def test1():
 			print "No best match!"
 
 def test2():
+	print "Testing mutualSim"
 	print "Found ", len(userQueries.keys()), " users"
 	print len(termFrequencies.keys()), " users have queries"
 
@@ -107,6 +122,8 @@ def test2():
 			print "No best match!"
 
 def test3():
+
+	print "Testing simExtended"
 	print "Found ", len(userQueries.keys()), " users"
 	print len(termFrequencies.keys()), " users have queries"
 
@@ -116,8 +133,19 @@ def test3():
 		for userB in termFrequencies.keys():
 			if userB != userA:
 				similarity = simExtended(userA, userB, 5)
-
-
+				if similarity > bestMatch:
+					bestMatch = similarity
+					bestUser = userB
+		if bestUser != 0:
+			print
+			print "Best matching score: ", bestMatch
+			print "Queries user A: ", userExtended.UserLMExtended(userA).queries
+			print "Queries user B: ", userExtended.UserLMExtended(bestUser).queries
+			print "#queries A: ", len(userExtended.UserLMExtended(userA).queries)
+			print "#queries B: ", len(userExtended.UserLMExtended(bestUser).queries)
+		else:
+			print 
+			print "No best match!"
 
 
 test3()
