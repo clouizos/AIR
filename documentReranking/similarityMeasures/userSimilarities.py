@@ -1,6 +1,6 @@
 # I'm feeling it's not so good to rely on the termfrequencies in the user class...
 import userLM as user
-import userLM as userExtended
+import UserLMExtended as userExtended
 import pickle
 
 print "Importing term frequences..."
@@ -120,21 +120,8 @@ def test3():
 		for userB in termFrequencies.keys():
 			if userB != userA:
 				similarity = simExtended(userA, userB, 5)
-				if similarity > bestMatch:
-					bestMatch = similarity
-					bestUser = userB
-		if bestUser != 0:
-			print
-			print "Best matching score: ", bestMatch
-			print "Queries user A: ", user.UserLM(userA).queries
-			print "Queries user B: ", user.UserLM(bestUser).queries
-			print "#queries A: ", len(user.UserLM(userA).queries)
-			print "#queries B: ", len(user.UserLM(bestUser).queries)
-		else:
-			print 
-			print "No best match!"
 
 
 
 
-test1()
+test3()
