@@ -25,8 +25,8 @@ class UserLMExtended:
 		
 		# get clickedDocuments
 		self.clickedDocuments = self.getClickedDocuments()
-		
-		print self.termFrequencies
+		print "Clicked documents: ", self.clickedDocuments
+		print "Term frequencies from queries: ", self.termFrequencies
 
 		self.termFrequencies = self.updateTermFrequencies()
 
