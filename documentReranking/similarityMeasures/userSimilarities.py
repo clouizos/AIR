@@ -201,4 +201,4 @@ def test4():
 			print "No best match!"
 
 
-test3()
+test4()
