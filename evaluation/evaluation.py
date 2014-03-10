@@ -40,8 +40,7 @@ class Result:
 def test():
 
 	for user in userQueriesAndClicks_strict.keys():
-		for query in userQueriesAndClicks_strict[user]:
-			res = Result(user, query)
+		res = Result(user)
 
 
 test()
