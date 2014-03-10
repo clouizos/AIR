@@ -5,7 +5,7 @@ import pickle
 
 termFrequencies = pickle.load(open('../../../termFrequencies_strict', 'rb'))
 userQueries = pickle.load(open('../../../userQueries_strict', 'rb'))
-from user_specific_positive_negative_examples_dic_strict import dictionary as userQueriesAndClicks_strict
+userQueriesAndClicks_strict = pickle.load(open('../../../user_specific_positive_negative_examples_dic_strict', 'rb'))
 
 class UserLMExtended:
 	id = 0
