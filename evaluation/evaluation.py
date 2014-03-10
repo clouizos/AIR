@@ -5,8 +5,8 @@
 # it uses the information in either user_specific_positive_negative_examples_dic_strict or the unstrict variant to 
 # evaluate the MAP of the rankedResults
 
-
 # it also provides a random ranking as a baseline!
+
 import pickle
 from random import shuffle
 userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
@@ -18,12 +18,12 @@ class Result:
 	randomResults = 0
 
 	def __init__(self, userID):
-
 		self.queryResults = dict( [ (x[0], (x[1], x[2])) for x in userQueriesAndClicks_strict[userID] ])
 		self.relevantDocuments = dict( [ (x[0], x[1]) for x in userQueriesAndClicks_strict[userID]])
 		self.allDocuments = dict( [ (x[0], x[1].union(x[2])) for x in userQueriesAndClicks_strict[userID] ])
 		self.randomResults = self.rankRandom()
 
+	# assigns a random ranking for baseline testing purposes
 	def rankRandom(self):
 		randomRes = dict()
 		for query in self.allDocuments:
@@ -32,6 +32,8 @@ class Result:
 			randomRes[query] = tmp
 		return randomRes
 
+	# given a query and a ranking, this function provides the relevanceJudgements list as 
+	# required by averagePrecision
 	def turnIntoBinaryRelevanceThing(self, query, ranking):
 		rel = self.relevantDocuments[query]
 		binarized = []
@@ -42,6 +44,7 @@ class Result:
 				binarized.append(0)
 		return binarized
 
+# test the test, haha
 def test():
 	for user in userQueriesAndClicks_strict.keys():
 		userInfo = userQueriesAndClicks_strict[user]
@@ -56,9 +59,13 @@ def test():
 		map = map / float(len(userInfo))
 		print "Map for user ", user, " is ", map
 
+# Calculates precision at rank len(relevanceJudgements) (so the caller should provide the right k already)
+# input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
 def precisionAt(relevanceJudgements):
 	return sum(relevanceJudgements) / len(relevanceJudgements)
 
+# Calculates average precision of a ranked list
+# input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
 def averagePrecision(relevanceJudgements):
 	ap = 0
 	for k in range(len(relevanceJudgements)):
