@@ -11,19 +11,23 @@ userQueriesAndClicks_strict = pickle.load(open('../../../user_specific_positive_
 
 
 class Result:
-	documents = 0
-	resultRanking = 0
-	actualRelevantDocuments = 0
+	queryResults = 0
+	relevantDocuments = 0
+	allDocuments = 0
 
-	def __init__(self, userID, query):
-		self.actualRelevantDocuments = userQueriesAndClicks_strict[userID][query][1]
-		self.documents = userQueriesAndClicks_strict[userID][query][1].union(userQueriesAndClicks_strict[userID][query][2])
-		self.resultRanking = rank()
+	def __init__(self, userID):
 
-		print self.actualRelevantDocuments
-		print self.documents
-		print self.resultRanking
+		self.queryResults = dict( [ (x[0], (x[1], x[2])) for x in userQueriesAndClicks_strict[userID] ])
+		self.relevantDocuments = dict( [ (x[0], x[1]) for x in userQueriesAndClicks_strict[userID]])
+		self.allDocuments = dict( [ (x[0], x[1].union(x[2])) for x in userQueriesAndClicks_strict[userID] ])
+
 		print
+		print
+		print self.queryResults
+		print self.relevantDocuments
+		print self.allDocuments
+
+
 
 	def rank(self):
 		docs = list(self.documents)
@@ -32,6 +36,7 @@ class Result:
 
 
 def test():
+
 	for user in userQueriesAndClicks_strict.keys():
 		for query in userQueriesAndClicks_strict[user]:
 			res = Result(user, query)
