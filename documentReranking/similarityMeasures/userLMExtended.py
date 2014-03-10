@@ -28,7 +28,7 @@ class UserLMExtended:
 		
 		print self.termFrequencies
 
-		self.termFrequencies = self.updatedTermFrequencies()
+		self.termFrequencies = self.updateTermFrequencies()
 
 		print self.termFrequencies
 
