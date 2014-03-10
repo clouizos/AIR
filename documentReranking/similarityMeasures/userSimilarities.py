@@ -59,6 +59,8 @@ def simExtended(userA, userB, minCommonTerms):
 	print A.clickedDocuments
 	print B.clickedDocuments
 
+	return 0
+
 
 def test1():
 	print "Found ", len(userQueries.keys()), " users"
@@ -94,6 +96,30 @@ def test2():
 		for userB in termFrequencies.keys():
 			if userB != userA:
 				similarity = mutualSim(userA, userB, 5)
+				if similarity > bestMatch:
+					bestMatch = similarity
+					bestUser = userB
+		if bestUser != 0:
+			print
+			print "Best matching score: ", bestMatch
+			print "Queries user A: ", user.UserLM(userA).queries
+			print "Queries user B: ", user.UserLM(bestUser).queries
+			print "#queries A: ", len(user.UserLM(userA).queries)
+			print "#queries B: ", len(user.UserLM(bestUser).queries)
+		else:
+			print 
+			print "No best match!"
+
+def test3():
+	print "Found ", len(userQueries.keys()), " users"
+	print len(termFrequencies.keys()), " users have queries"
+
+	for userA in termFrequencies.keys():
+		bestMatch = -9999
+		bestUser = 0
+		for userB in termFrequencies.keys():
+			if userB != userA:
+				similarity = simExtended(userA, userB, 5)
 				if similarity > bestMatch:
 					bestMatch = similarity
 					bestUser = userB
