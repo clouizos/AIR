@@ -25,8 +25,6 @@ class UserLMExtended:
 		
 		# get clickedDocuments
 		self.clickedDocuments = self.getClickedDocuments()
-		print "Clicked documents: ", self.clickedDocuments
-		print "Term frequencies from queries: ", self.termFrequencies
 
 		self.termFrequencies = self.updateTermFrequencies()
 
@@ -45,6 +43,7 @@ class UserLMExtended:
 		updatedTermFrequencies = self.termFrequencies
 		for doc in self.clickedDocuments:
 			if doc in documents:
+				print "Updating..."
 				contents = documents[doc]
 				contents = contents.split(' ')
 				for term in contents:
@@ -52,9 +51,6 @@ class UserLMExtended:
 						updatedTermFrequencies[term] += 1
 					else:
 						updatedTermFrequencies[term] = 1
-			else:
-				print "Document not found"
-
 		return updatedTermFrequencies
 
 
