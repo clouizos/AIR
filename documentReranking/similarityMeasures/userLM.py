@@ -6,7 +6,7 @@ import pickle
 termFrequencies = pickle.load(open('../../../termFrequencies_strict', 'rb'))
 userQueries = pickle.load(open('../../../userQueries_strict', 'rb'))
 
-class User:
+class UserLM:
 	vocabularySize = 0
 	queries = []
 	termFrequencies = []

@@ -1,5 +1,5 @@
 # I'm feeling it's not so good to rely on the termfrequencies in the user class...
-import user as user 
+import userLM as user
 import pickle
 
 print "Importing term frequences..."
@@ -11,8 +11,8 @@ userQueries = pickle.load(open('../../../userQueries_strict', 'rb'))
 
 def sim(userA, userB, minCommonTerms):
 	# create two user objects
-	A = user.User(userA)
-	B = user.User(userB)
+	A = user.UserLM(userA)
+	B = user.UserLM(userB)
 	similarityScore = 0
 
 	# check if they have minCommonTerms terms in common
@@ -28,8 +28,8 @@ def sim(userA, userB, minCommonTerms):
 	return  similarityScore
 
 def mutualSim(userA, userB, minCommonTerms):
-	A = user.User(userA)
-	B = user.User(userB)
+	A = user.UserLM(userA)
+	B = user.UserLM(userB)
 	similarityScoreAB = 0
 	similarityScoreBA = 0
 
@@ -67,10 +67,10 @@ def hoi():
 		if bestUser != 0:
 			print
 			print "Best matching score: ", bestMatch
-			print "Queries user A: ", user.User(userA).queries
-			print "Queries user B: ", user.User(bestUser).queries
-			print "#queries A: ", len(user.User(userA).queries)
-			print "#queries B: ", len(user.User(bestUser).queries)
+			print "Queries user A: ", user.UserLM(userA).queries
+			print "Queries user B: ", user.UserLM(bestUser).queries
+			print "#queries A: ", len(user.UserLM(userA).queries)
+			print "#queries B: ", len(user.UserLM(bestUser).queries)
 		else:
 			print 
 			print "No best match!"
