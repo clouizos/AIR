@@ -24,7 +24,7 @@ class UserLMExtended:
 		
 		# get clickedDocuments
 		self.getClickedDocuments()
-		print clickedDocuments
+		print self.clickedDocuments
 
 
 
