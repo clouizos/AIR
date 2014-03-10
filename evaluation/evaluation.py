@@ -5,9 +5,11 @@
 # it uses the information in either user_specific_positive_negative_examples_dic_strict or the unstrict variant to 
 # evaluate the MAP of the rankedResults
 
+
 # it also provides a random ranking as a baseline!
+import pickle
 from random import shuffle
-userQueriesAndClicks_strict = pickle.load(open('../../../user_specific_positive_negative_examples_dic_strict', 'rb'))
+userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
 
 
 class Result:
