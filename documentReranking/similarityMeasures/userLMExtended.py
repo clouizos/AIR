@@ -19,17 +19,22 @@ class UserLMExtended:
 
 		# first extract termFrequnecies from the indexed file
 		self.termFrequencies = termFrequencies[userID]
-
 		# finally get vocabularySize
 		self.vocabularySize = sum(self.termFrequencies.values())
 		
 		# get clickedDocuments
 		self.clickedDocuments = self.getClickedDocuments()
 
+		print "# of unique terms ", len(self.termFrequencies.keys())
+
+		# update term frequencies
 		self.termFrequencies = self.updateTermFrequencies()
 
-		print self.termFrequencies
+		print "# of unique terms after update", len(self.termFrequencies.keys())
 
+		# finally get vocabularySize
+		self.vocabularySize = sum(self.termFrequencies.values())
+		
 	def getClickedDocuments(self):
 		clicks = set()
 		userInfo = userQueriesAndClicks_strict[self.id]
@@ -43,7 +48,6 @@ class UserLMExtended:
 		updatedTermFrequencies = self.termFrequencies
 		for doc in self.clickedDocuments:
 			if doc in documents:
-				print "Updating..."
 				contents = documents[doc]
 				contents = contents.split(' ')
 				for term in contents:
