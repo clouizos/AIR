@@ -23,14 +23,6 @@ class Result:
 		self.relevantDocuments = dict( [ (x[0], x[1]) for x in userQueriesAndClicks_strict[userID]])
 		self.allDocuments = dict( [ (x[0], x[1].union(x[2])) for x in userQueriesAndClicks_strict[userID] ])
 
-		print
-		print
-		print self.queryResults
-		print self.relevantDocuments
-		print self.allDocuments
-
-
-
 	def rank(self):
 		docs = list(self.documents)
 		shuffle(docs)
