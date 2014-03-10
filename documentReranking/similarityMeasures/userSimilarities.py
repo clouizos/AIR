@@ -1,6 +1,6 @@
 # I'm feeling it's not so good to rely on the termfrequencies in the user class...
 import userLM as user
-import UserLMExtended as userExtended
+import userLMExtended as userExtended
 import pickle
 
 print "Importing term frequences..."
