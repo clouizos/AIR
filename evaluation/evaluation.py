@@ -49,8 +49,8 @@ def test():
 		map = 0
 		for infoTriplet in userInfo:
 			# get a ranking for the query (now we're just taking a random I guess)
-			# ranking = res.randomResults[infoTriplet[0]]
-			ranking = res.allDocuments[infoTriplet[0]]
+			ranking = res.randomResults[infoTriplet[0]]
+			# ranking = res.allDocuments[infoTriplet[0]]
 			relevanceJudgements = res.turnIntoBinaryRelevanceThing(infoTriplet[0], ranking)
 			map += averagePrecision(relevanceJudgements)
 		map = map / float(len(userInfo))
