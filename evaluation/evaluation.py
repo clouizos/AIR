@@ -28,7 +28,7 @@ class Result:
 		randomRes = dict()
 		for query in self.allDocuments:
 			tmp = list(self.allDocuments[query])
-			shufle(tmp)
+			shuffle(tmp)
 			randomRes[query] = tmp
 		return randomRes
 
@@ -40,6 +40,7 @@ class Result:
 				binarized.append(1)
 			else:
 				binarized.append(0)
+		return binarized
 
 def test():
 	for user in userQueriesAndClicks_strict.keys():
@@ -48,7 +49,8 @@ def test():
 		map = 0
 		for infoTriplet in userInfo:
 			# get a ranking for the query (now we're just taking a random I guess)
-			ranking = res.randomResults[infoTriplet[0]]
+			# ranking = res.randomResults[infoTriplet[0]]
+			ranking = res.allDocuments[infoTriplet[0]]
 			relevanceJudgements = res.turnIntoBinaryRelevanceThing(infoTriplet[0], ranking)
 			map += averagePrecision(relevanceJudgements)
 		map = map / float(len(userInfo))
@@ -63,6 +65,6 @@ def averagePrecision(relevanceJudgements):
 		if relevanceJudgements[k] != 0:
 			ap += precisionAt(relevanceJudgements[:k+1])
 	ap = ap / float(sum(relevanceJudgements))
-
+	return ap
 
 test()
