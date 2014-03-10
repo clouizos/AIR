@@ -6,6 +6,7 @@ import pickle
 termFrequencies = pickle.load(open('../../../termFrequencies_strict', 'rb'))
 userQueries = pickle.load(open('../../../userQueries_strict', 'rb'))
 userQueriesAndClicks_strict = pickle.load(open('../../../user_specific_positive_negative_examples_dic_strict', 'rb'))
+documents = pickle.load(open('../../../documentContents', 'rb'))
 
 class UserLMExtended:
 	id = 0
@@ -23,10 +24,13 @@ class UserLMExtended:
 		self.vocabularySize = sum(self.termFrequencies.values())
 		
 		# get clickedDocuments
-		self.getClickedDocuments()
-		print self.clickedDocuments
+		self.clickedDocuments = self.getClickedDocuments()
+		
+		print self.termFrequencies
 
+		self.termFrequencies = self.updatedTermFrequencies()
 
+		print self.termFrequencies
 
 	def getClickedDocuments(self):
 		clicks = set()
@@ -36,6 +40,20 @@ class UserLMExtended:
 			for d in c:
 				clicks.add(d)
 		return clicks
+
+	def updateTermFrequencies(self):
+		updatedTermFrequencies = self.termFrequencies
+		for doc in self.clickedDocuments:
+			contents = documentContents[doc]
+			contents = contents.split(' ')
+			for term in contents:
+				if term in updatedTermFrequencies:
+					updatedTermFrequencies[term] += 1
+				else:
+					updatedTermFrequencies[term] = 1
+
+		return updatedTermFrequencies
+
 
 	# this method has very simple smoothing by +1
 	def getTermFrequency(self, term):

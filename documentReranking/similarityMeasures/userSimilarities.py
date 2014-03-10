@@ -53,11 +53,7 @@ def mutualSim(userA, userB, minCommonTerms):
 	return similarityScoreAB + similarityScoreBA
 
 def simExtended(userA, userB, minCommonTerms):
-	A = userExtended.UserLMExtended(userA)
 	B = userExtended.UserLMExtended(userB)
-
-	print A.clickedDocuments
-	print B.clickedDocuments
 
 	return 0
 
