@@ -44,7 +44,7 @@ class UserLMExtended:
 	def updateTermFrequencies(self):
 		updatedTermFrequencies = self.termFrequencies
 		for doc in self.clickedDocuments:
-			contents = documentContents[doc]
+			contents = documents[doc]
 			contents = contents.split(' ')
 			for term in contents:
 				if term in updatedTermFrequencies:
