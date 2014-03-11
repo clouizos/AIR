@@ -1,3 +1,3 @@
 # init
 
-import userSimilarity as userSimilarity
+from userSimilarities import *

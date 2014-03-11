@@ -3,8 +3,8 @@
 import numpy as np
 import pickle
 
-termFrequencies = pickle.load(open('../../../termFrequencies_strict', 'rb'))
-userQueries = pickle.load(open('../../../userQueries_strict', 'rb'))
+termFrequencies = pickle.load(open('../../termFrequencies_strict', 'rb'))
+userQueries = pickle.load(open('../../userQueries_strict', 'rb'))
 
 class UserLM:
 	vocabularySize = 0

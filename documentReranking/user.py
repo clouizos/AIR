@@ -1,29 +1,24 @@
 # user
 # Created by Anouk Visser
+import similarityMeasures
 
 class User:
 	
 	userID = 0
-	queries = []
-	clickedDocuments = []
-	similarUsersRankedList = [] 
 	
-	def __init__(self, userID, numberOfMostSimilarUsers):
+	def __init__(self, userID):
 		print "initialize user with userID", userID
 		self.userID = userID
 
-		# implement
-		self.queries = []
-		self.clickedDocuments = []
-
-		self.similarUsersRankedList = self.mostSimilarUsers(numberOfMostSimilarUsers)
-
 	# returns 0/1 depending on whether the user clicked the document
 	def didClickDocument(self, document, query):
+		print "needs implementing"
 		return 1
 
 	def getMostSimilarUsers(self, numberOfMostSimilarUsers):
-		
+		print "needs implementing"
+		return []
+
  
 
 

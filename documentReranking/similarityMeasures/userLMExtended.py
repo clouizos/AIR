@@ -3,10 +3,10 @@
 import numpy as np
 import pickle
 
-termFrequencies = pickle.load(open('../../../termFrequencies_strict', 'rb'))
-userQueries = pickle.load(open('../../../userQueries_strict', 'rb'))
-userQueriesAndClicks_strict = pickle.load(open('../../../user_specific_positive_negative_examples_dic_strict', 'rb'))
-documents = pickle.load(open('../../../documentContents', 'rb'))
+termFrequencies = pickle.load(open('../../termFrequencies_strict', 'rb'))
+userQueries = pickle.load(open('../../userQueries_strict', 'rb'))
+userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
+documents = pickle.load(open('../../documentContents', 'rb'))
 
 class UserLMExtended:
 	id = 0
