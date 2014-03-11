@@ -4,6 +4,8 @@
 import user as user
 import pickle
 
+allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
+
 
 
 def getRankingScoreForDocument(similarUsers, document):
@@ -23,24 +25,39 @@ def createReRankingDump():
 
 	numberOfSimilarUsers = 25
 	minTermsInCommon = 5
-	userID = 'UID48'
-	# so we have a user
-	userA = user.User(userID)
-	mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
-
-	queryRankingResults = dict()
 	
-	for query in userA.queries:
-		documentsToReRank = userA.queryResults[query]
-		ranking = []
-		for doc in documentsToReRank:
-			score = getRankingScoreForDocument(mostSimilarUsers, doc)
-			ranking.append((doc, score))
-		ranking.sort(key=lambda x : x[1], reverse=True)
-		toWriteToFile = [elem[0] for elem in ranking]
-		print toWriteToFile
-		queryRankingResults[query] = toWriteToFile
-	resultingRanks[userID] = queryRankingResults
+	for userID in allUsers:
+		# take a user
+		userA = user.User(userID)
+
+		# get mostSimilar users
+		mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
+
+		queryRankingResults = dict()
+		
+		# get ranking for every query
+		for query in userA.queries:
+
+			# get documents
+			documentsToReRank = userA.queryResults[query]
+
+			ranking = []
+			for doc in documentsToReRank:
+				# get ranking socre for the document given the mostSimilarUsers
+				score = getRankingScoreForDocument(mostSimilarUsers, doc)
+				ranking.append((doc, score))
+			# sort it
+			ranking.sort(key=lambda x : x[1], reverse=True)
+
+			# filter out the scores
+			toWriteToFile = [elem[0] for elem in ranking]
+			
+			# create sub dictionary
+			queryRankingResults[query] = toWriteToFile
+		
+		# write results for all queries for one user to the results dictionary
+		resultingRanks[userID] = queryRankingResults
+		
 	return resultingRanks
 
 print createReRankingDump()
