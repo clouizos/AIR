@@ -52,7 +52,7 @@ class User:
 						actualUserIDs[i] = user
 						filled = True
 
-		returnList = [(actualUserIDs[i], mostSimilar[i]) for i in range(len(mostSimilar)) if actualUserIDs[if] != -9999]
+		returnList = [(actualUserIDs[i], mostSimilar[i]) for i in range(len(mostSimilar)) if actualUserIDs[i] != -9999]
 
 		return returnList
 
