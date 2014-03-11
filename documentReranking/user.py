@@ -21,6 +21,9 @@ class User:
 	# returns 0/1 depending on whether the user clicked the document
 	def didClickDocument(self, document, query):
 		return 1
+
+	def getMostSimilarUsers(self, numberOfMostSimilarUsers):
+		
  
 
 

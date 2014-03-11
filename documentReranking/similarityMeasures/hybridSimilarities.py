@@ -1,1 +1,0 @@
-# hybrid similarity models (user + query + -possibly- intent)
