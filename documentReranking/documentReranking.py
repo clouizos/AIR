@@ -28,6 +28,8 @@ def createReRankingDump():
 	userA = user.User(userID)
 	mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
 
+	queryRankingResults = dict()
+	
 	for query in userA.queries:
 		documentsToReRank = userA.queryResults[query]
 		ranking = []
@@ -35,10 +37,13 @@ def createReRankingDump():
 			score = getRankingScoreForDocument(mostSimilarUsers, doc)
 			ranking.append((doc, score))
 		ranking.sort(key=lambda x : x[1], reverse=True)
-		toWriteToFile = [x[0] for elem in ranking]
+		toWriteToFile = [elem[0] for elem in ranking]
 		print toWriteToFile
+		queryRankingResults[query] = toWriteToFile
+	resultingRanks[userID] = queryRankingResults
+	return resultingRanks
 
-createReRankingDump()
+print createReRankingDump()
 
 
 
