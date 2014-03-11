@@ -74,7 +74,7 @@ def test():
 		mapRandom = mapRandom / float(len(userInfo))
 		map = map / float(len(userInfo))
 	
-		print "proposed - random = ", map - mapRandom
+		print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
 
 # Calculates precision at rank len(relevanceJudgements) (so the caller should provide the right k already)
 # input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
