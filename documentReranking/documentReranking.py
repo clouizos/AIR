@@ -3,7 +3,7 @@
 
 import user as user
 
-numberOfSimilarUsers = 5
+numberOfSimilarUsers = 25
 minTermsInCommon = 5
 userID = 'UID48'
 # so we have a user
@@ -19,6 +19,8 @@ def getRankingScoreForDocument(similarUsers, document):
 		userB = user.User(userID)
 		if userB.didClickDocument(document):
 			rank += similarity
+	if rank == 0:
+		rank = -9990
 	return rank
 
 for query in userA.queries:
