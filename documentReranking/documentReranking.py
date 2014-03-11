@@ -11,6 +11,7 @@ u = user.User(userID)
 
 for query in u.queries:
 	print query
+	print u.queryResults[query]
 print u.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
 
 
