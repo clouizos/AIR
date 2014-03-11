@@ -66,7 +66,7 @@ def createReRankingDump():
 	return resultingRanks
 
 results = createReRankingDump()
-pickle.dump(results, open('../../simExtended_strict_ranking_results', 'wb'))
+pickle.dump(results, open('../../mutualSim_strict_ranking_results', 'wb'))
 
 
 
