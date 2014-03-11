@@ -6,7 +6,8 @@ import user as user
 
 userID = 'UID48'
 
-user.User(userID)
+u = user.User(userID)
+print u.getMostSimilarUsers()
 
 
 

@@ -62,6 +62,7 @@ def simExtended(userA, userB, minCommonTerms):
 
 	return  similarityScore
 
+# input is just the userID as a string
 def mutualSimExtended(userA, userB, minCommonTerms):
 	
 	A = userExtended.UserLMExtended(userA)

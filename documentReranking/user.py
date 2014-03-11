@@ -1,6 +1,9 @@
 # user
 # Created by Anouk Visser
 import similarityMeasures
+import pickle
+
+allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 
 class User:
 	
@@ -16,6 +19,7 @@ class User:
 		return 1
 
 	def getMostSimilarUsers(self, numberOfMostSimilarUsers):
+		print allUsers
 		print "needs implementing"
 		return []
 
