@@ -28,8 +28,10 @@ def createReRankingDump():
 
 	numberOfSimilarUsers = 25
 	minTermsInCommon = 5
-	
+	counter = 0
 	for userID in allUsers:
+		counter += 1
+		print "Working on user ", counter
 		# take a user
 		userA = user.User(userID)
 
@@ -64,7 +66,7 @@ def createReRankingDump():
 	return resultingRanks
 
 results = createReRankingDump()
-pickle.dump(results, open('firstRankingResults', 'wb'))
+pickle.dump(results, open('../../firstRankingResults', 'wb'))
 
 
 
