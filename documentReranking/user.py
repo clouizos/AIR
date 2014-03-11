@@ -19,8 +19,8 @@ class User:
 		return 1
 	
 	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon):
-		mostSimilar = [0 for i in range(numberOfMostSimilarUsers)]
-		actualUserIDs = [0 for i in range(numberOfMostSimilarUsers)]
+		mostSimilar = [-9999 for i in range(numberOfMostSimilarUsers)]
+		actualUserIDs = [-9999 for i in range(numberOfMostSimilarUsers)]
 		for user in allUsers:
 			filled = False
 			similarityScore = sims.sim(self.userID, user, minTermsInCommon)

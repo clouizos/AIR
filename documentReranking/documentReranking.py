@@ -6,7 +6,6 @@ import user as user
 numberOfSimilarUsers = 5
 minTermsInCommon = 5
 userID = 'UID48'
-
 u = user.User(userID)
 print u.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
 
