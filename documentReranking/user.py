@@ -22,18 +22,19 @@ class User:
 		mostSimilar = [-9999 for i in range(numberOfMostSimilarUsers)]
 		actualUserIDs = [-9999 for i in range(numberOfMostSimilarUsers)]
 		for user in allUsers:
-			filled = False
-			similarityScore = sims.sim(self.userID, user, minTermsInCommon)
-			for i in range(len(mostSimilar)):
-				if similarityScore > mostSimilar[i] and filled == False:
-					for j in range(len(mostSimilar)):
-						index = len(mostSimilar) - 1 - j
-						if index > i:
-							mostSimilar[index] = mostSimilar[index-1]
-							actualUserIDs[index] = actualUserIDs[index-1]
-					mostSimilar[i] = similarityScore
-					actualUserIDs[i] = user
-					filled = True
+			if user != self.userID:
+				filled = False
+				similarityScore = sims.sim(self.userID, user, minTermsInCommon)
+				for i in range(len(mostSimilar)):
+					if similarityScore > mostSimilar[i] and filled == False:
+						for j in range(len(mostSimilar)):
+							index = len(mostSimilar) - 1 - j
+							if index > i:
+								mostSimilar[index] = mostSimilar[index-1]
+								actualUserIDs[index] = actualUserIDs[index-1]
+						mostSimilar[i] = similarityScore
+						actualUserIDs[i] = user
+						filled = True
 		return actualUserIDs
 
  
