@@ -20,14 +20,16 @@ def getRankingScoreForDocument(similarUsers, document):
 		if userB.didClickDocument(document):
 			rank += similarity
 	return rank
-	
-ranking = []
+
 for query in userA.queries:
 	documentsToReRank = userA.queryResults[query]
+	ranking = []
 	for doc in documentsToReRank:
 		score = getRankingScoreForDocument(mostSimilarUsers, doc)
 		ranking.append((doc, score))
-print ranking
+	print "Ranking for query: ", query
+	print ranking
+	print
 
 
 

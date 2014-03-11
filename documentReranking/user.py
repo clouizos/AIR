@@ -14,7 +14,6 @@ class User:
 	queryResults = 0
 	
 	def __init__(self, userID):
-		print "initialize user with userID", userID
 		self.userID = userID
 
 		qs = set()
