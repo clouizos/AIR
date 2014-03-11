@@ -1,6 +1,6 @@
 # user
 # Created by Anouk Visser
-import similarityMeasures
+import similarityMeasures as sims
 import pickle
 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
@@ -17,11 +17,24 @@ class User:
 	def didClickDocument(self, document, query):
 		print "needs implementing"
 		return 1
-
-	def getMostSimilarUsers(self, numberOfMostSimilarUsers):
-		print allUsers
-		print "needs implementing"
-		return []
+	
+	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon):
+		mostSimilar = [0 for i in range(numberOfMostSimilarUsers)]
+		actualUserIDs = [0 for i in range(numberOfMostSimilarUsers)]
+		for user in allUsers:
+			filled = False
+			similarityScore = sims.sim(self.userID, user, minTermsInCommon)
+			for i in range(len(mostSimilar)):
+				if similarityScore > mostSimilar[i] and filled == False:
+					for j in range(len(mostSimilar)):
+						index = len(mostSimilar) - 1 - j
+						if index > i:
+							mostSimilar[index] = mostSimilar[index-1]
+							actualUserIDs[index] = actualUserIDs[index-1]
+					mostSimilar[i] = similarityScore
+					actualUserIDs[i] = user
+					filled = True
+		return actualUserIDs
 
  
 

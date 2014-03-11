@@ -2,12 +2,13 @@
 # Created by Anouk Visser (27-02-2014)
 
 import user as user
-# testing on user with ID: 
 
+numberOfSimilarUsers = 5
+minTermsInCommon = 5
 userID = 'UID48'
 
 u = user.User(userID)
-print u.getMostSimilarUsers()
+print u.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
 
 
 
