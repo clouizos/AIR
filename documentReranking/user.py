@@ -4,19 +4,36 @@ import similarityMeasures as sims
 import pickle
 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
+userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
+
 
 class User:
 	
 	userID = 0
+	queries = 0
+	queryResults = 0
 	
 	def __init__(self, userID):
 		print "initialize user with userID", userID
 		self.userID = userID
 
+		qs = set()
+		for userInfo in userQueriesAndClicks_strict[self.userID]:
+			qs.add(userInfo[0])
+		self.queries = qs
+
+		self.queryResults = dict( [ (x[0], x[1].union(x[2])) for x in userQueriesAndClicks_strict[userID] ])
+
 	# returns 0/1 depending on whether the user clicked the document
-	def didClickDocument(self, document, query):
-		print "needs implementing"
-		return 1
+	def didClickDocument(self, document):
+		click = 0
+		userInfo = userQueriesAndClicks_strict[self.userID]
+		for infoTriplet in userInfo:
+			clickedDocs = infoTriplet[1]
+			if document in clickedDocs:
+				click = 1
+				break
+		return click
 	
 	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon):
 		mostSimilar = [-9999 for i in range(numberOfMostSimilarUsers)]
@@ -35,7 +52,9 @@ class User:
 						mostSimilar[i] = similarityScore
 						actualUserIDs[i] = user
 						filled = True
-		return actualUserIDs
+
+		returnList = [(actualUserIDs[i], mostSimilar[i]) for i in range(len(mostSimilar))]
+		return returnList
 
  
 
