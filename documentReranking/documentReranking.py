@@ -7,9 +7,12 @@ import pickle
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 
 
-
+# gives the ranking score for a document given similarUsers
 def getRankingScoreForDocument(similarUsers, document):
 	rank = 0
+	# for all users, find the similarity score, add this to 
+	# the total ranking score if the user actually clicked the documents
+	# if no one clicked the document, set the score to -9999
 	for uB in similarUsers:
 		userID = uB[0]
 		similarity = uB[1]
@@ -57,10 +60,11 @@ def createReRankingDump():
 		
 		# write results for all queries for one user to the results dictionary
 		resultingRanks[userID] = queryRankingResults
-		
+
 	return resultingRanks
 
-print createReRankingDump()
+results = createReRankingDump()
+pickle.dump(results, open('firstRankingResults', 'wb'))
 
 
 

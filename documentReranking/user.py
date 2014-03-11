@@ -6,9 +6,7 @@ import pickle
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
 
-
 class User:
-	
 	userID = 0
 	queries = 0
 	queryResults = 0
@@ -34,12 +32,14 @@ class User:
 				break
 		return click
 	
+	# THIS SHOULD BE EXTENDED TO FIND MORE FORMS OF SIMILARITY
 	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon):
 		mostSimilar = [-9999 for i in range(numberOfMostSimilarUsers)]
 		actualUserIDs = [-9999 for i in range(numberOfMostSimilarUsers)]
 		for user in allUsers:
 			if user != self.userID:
 				filled = False
+				# HERE WE CAN CALL VIRTUALLY ANY SIMILARITY| FUNCTION, how will we set this up?
 				similarityScore = sims.sim(self.userID, user, minTermsInCommon)
 				for i in range(len(mostSimilar)):
 					if similarityScore > mostSimilar[i] and filled == False:
