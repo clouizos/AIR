@@ -10,13 +10,6 @@ userID = 'UID48'
 userA = user.User(userID)
 mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
 
-ranking = []
-for query in userA.queries:
-	documentsToReRank = userA.queryResults[query]
-	for doc in documentsToReRank:
-		score = getRankingScoreForDocument(mostSimilarUsers, doc)
-		ranking.append((doc, score))
-print ranking
 
 def getRankingScoreForDocument(similarUsers, document):
 	rank = 0
@@ -27,6 +20,16 @@ def getRankingScoreForDocument(similarUsers, document):
 		if userB.didClickDocument(document):
 			rank += similarity
 	return rank
+	
+ranking = []
+for query in userA.queries:
+	documentsToReRank = userA.queryResults[query]
+	for doc in documentsToReRank:
+		score = getRankingScoreForDocument(mostSimilarUsers, doc)
+		ranking.append((doc, score))
+print ranking
+
+
 
 
 
