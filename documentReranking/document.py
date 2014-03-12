@@ -16,6 +16,8 @@ class Document:
 			self.documentID = id
 			self.numberOFClicks = documentClicks[self.documentID]
 			self.queries = queriesLeadingToClick[self.documentID]
+		else:
+			print "Document missing: ", id
 
 
  
