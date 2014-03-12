@@ -76,7 +76,7 @@ def test():
 		mapRandom = mapRandom / float(len(userInfo))
 		map = map / float(len(userInfo))
 		overallMAPRandom += mapRandom
-		overallMap += overallMap
+		overallMap += map
 	
 		print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
 	overallMAPRandom = overallMAPRandom / float(len(userQueriesAndClicks_strict.keys()))
