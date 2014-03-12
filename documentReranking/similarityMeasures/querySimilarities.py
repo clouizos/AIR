@@ -1,10 +1,6 @@
-# here I will define some query similartiy measures
 import pickle
-print "Loading queries..."
-queries = pickle.load(open('../../queries_strict', 'rb'))['queries']
 
 # Got this from http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
-# Should take a closer look at it, looks good at first sight
 def levenshtein(s1, s2):
 	if len(s1) < len(s2):
 		return levenshtein(s2, s1)

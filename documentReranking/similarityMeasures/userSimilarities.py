@@ -1,6 +1,7 @@
 import userLM as user
 import userLMExtended as userExtended
 
+# LOTS OF CODE DUPLICATION HERE!!!
 def sim(userA, userB, minCommonTerms):
 	# create two user objects
 	A = user.UserLM(userA)
