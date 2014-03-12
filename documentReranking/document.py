@@ -12,9 +12,10 @@ class Document:
 	queries = 0
 
 	def __init__(self, id):
-		self.documentID = id
-		self.numberOFClicks = documentClicks[self.documentID]
-		self.queries = queriesLeadingToClick[self.documentID]
+		if id in documentClicks:
+			self.documentID = id
+			self.numberOFClicks = documentClicks[self.documentID]
+			self.queries = queriesLeadingToClick[self.documentID]
 
 
  
