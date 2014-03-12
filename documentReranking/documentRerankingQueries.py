@@ -5,15 +5,29 @@ import user as user
 import document as document
 import pickle
 import sys
+import similarityMeasures as sims
 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 outputFile = sys.argv[1]
 
 # gives the ranking score for a document based on its popularity (higher score = better)
-def getRankingScoreForDocument(documentID):
+def getRankingScoreForDocumentPopularityBased(documentID):
 	rank = 0
 	doc = document.Document(documentID)
 	return doc.numberOfClicks
+
+def getRankingScoreForDocument(query, documentID):
+	doc = document.Document(documentID)
+	queriesLeadingToDoc = doc.queries
+
+	avLevenshteinDistance = 0
+	for q in queriesLeadingToDoc:
+		avLevenshteinDistance += sims.levenshtein(q, query)
+	avLevenshteinDistance = avLevenshteinDistance / float(len(queriesLeadingToDoc))
+	avLevenshteinDistance = avLevenshteinDistance * -1
+
+	return avLevenshteinDistance
+
 
 def createReRankingDump():
 	resultingRanks = dict()
@@ -37,7 +51,7 @@ def createReRankingDump():
 			for doc in documentsToReRank:
 				
 				# get ranking socre for the document given the mostSimilarUsers
-				score = getRankingScoreForDocument(doc)
+				score = getRankingScoreForDocument(query, doc)
 				ranking.append((doc, score))
 			
 			# sort it (high to low)
