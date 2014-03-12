@@ -20,14 +20,16 @@ def getRankingScoreForDocument(query, documentID):
 	doc = document.Document(documentID)
 	queriesLeadingToDoc = doc.queries
 
-	avLevenshteinDistance = 0
-	for q in queriesLeadingToDoc:
-		avLevenshteinDistance += sims.levenshtein(q, query)
-	avLevenshteinDistance = avLevenshteinDistance / float(len(queriesLeadingToDoc))
-	avLevenshteinDistance = avLevenshteinDistance * -1
-
 	if len(queriesLeadingToDoc) == 0:
 		avLevenshteinDistance = -9999
+	else:
+		avLevenshteinDistance = 0
+		for q in queriesLeadingToDoc:
+			avLevenshteinDistance += sims.levenshtein(q, query)
+		avLevenshteinDistance = avLevenshteinDistance / float(len(queriesLeadingToDoc))
+		avLevenshteinDistance = avLevenshteinDistance * -1
+
+
  	return avLevenshteinDistance
 
 
