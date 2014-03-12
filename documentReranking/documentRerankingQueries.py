@@ -26,7 +26,9 @@ def getRankingScoreForDocument(query, documentID):
 	avLevenshteinDistance = avLevenshteinDistance / float(len(queriesLeadingToDoc))
 	avLevenshteinDistance = avLevenshteinDistance * -1
 
-	return avLevenshteinDistance
+	if len(queriesLeadingToDoc) == 0:
+		avLevenshteinDistance = -9999
+ 	return avLevenshteinDistance
 
 
 def createReRankingDump():
