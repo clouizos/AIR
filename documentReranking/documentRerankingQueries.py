@@ -2,41 +2,27 @@
 # Created by Anouk Visser (27-02-2014)
 
 import user as user
+import document as document
 import pickle
 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
+outputFile = sys.argv[1]
 
-
-# gives the ranking score for a document given similarUsers (everything is negative, but higher = better)
-def getRankingScoreForDocument(similarUsers, document):
+# gives the ranking score for a document based on its popularity (higher score = better)
+def getRankingScoreForDocument(documentID):
 	rank = 0
-	# for all users, find the similarity score, add this to 
-	# the total ranking score if the user actually clicked the documents
-	# if no one clicked the document, set the score to -9999
-	for uB in similarUsers:
-		userID = uB[0]
-		similarity = uB[1]
-		userB = user.User(userID)
-		if userB.didClickDocument(document):
-			rank += similarity
-	if rank == 0:
-		rank = -9990
-	return rank
+	doc = document.Document(documentID)
+	return doc.numberOfClicks
 
 def createReRankingDump():
 	resultingRanks = dict()
 
-	numberOfSimilarUsers = 25
-	minTermsInCommon = 5
 	counter = 0
 	for userID in allUsers:
 		counter += 1
 		print "Working on user ", counter
 		# take a user
 		userA = user.User(userID)
-
-		# get mostSimilar users
-		mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
 
 		queryRankingResults = dict()
 		
@@ -50,10 +36,10 @@ def createReRankingDump():
 			for doc in documentsToReRank:
 				
 				# get ranking socre for the document given the mostSimilarUsers
-				score = getRankingScoreForDocument(mostSimilarUsers, doc)
+				score = getRankingScoreForDocument(doc)
 				ranking.append((doc, score))
 			
-			# sort it
+			# sort it (high to low)
 			ranking.sort(key=lambda x : x[1], reverse=True)
 
 			# filter out the scores
@@ -68,7 +54,7 @@ def createReRankingDump():
 	return resultingRanks
 
 results = createReRankingDump()
-pickle.dump(results, open('../../mutualSimExtended_strict_ranking_results', 'wb'))
+pickle.dump(results, open(outputFile, 'wb'))
 
 
 
