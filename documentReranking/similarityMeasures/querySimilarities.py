@@ -25,25 +25,4 @@ def levenshtein(s1, s2):
 
 	return previous_row[-1]
 
-# will return the list of clicked documents the queries have in common
-# this can be seen as 'query intent', as the documents were relevant to the query
-# and fullfill its intent
-def clicksOnDocument():
 
-	return 0
-
-def test():
-	for q1 in queries:
-		bestMatch = 0
-		bestScore  = 100000
-		for q2 in queries:
-			if q1 != q2:
-				score = levenshtein(q1, q2)
-				if score < bestScore:
-					bestMatch = q2
-					bestScore = score
-		print "Evaluated q1: ", q1
-		print "Best match: ", bestMatch, " with score: ", bestScore, "\n"
-
-
-test()
