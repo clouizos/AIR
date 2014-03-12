@@ -13,11 +13,9 @@ class Document:
 
 	def __init__(self, id):
 		if id in documentClicks:
-			print "FOUND IT!"
 			self.documentID = id
 			self.numberOfClicks = documentClicks[self.documentID]
 			self.queries = queriesLeadingToClick[self.documentID]
-			print self.numberOfClicks
 
 
  
