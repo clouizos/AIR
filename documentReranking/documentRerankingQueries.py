@@ -4,6 +4,7 @@
 import user as user
 import document as document
 import pickle
+import sys
 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 outputFile = sys.argv[1]
