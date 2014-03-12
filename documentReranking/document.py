@@ -15,8 +15,9 @@ class Document:
 		if id in documentClicks:
 			print "FOUND IT!"
 			self.documentID = id
-			self.numberOFClicks = documentClicks[self.documentID]
+			self.numberOfClicks = documentClicks[self.documentID]
 			self.queries = queriesLeadingToClick[self.documentID]
+			print self.numberOfClicks
 
 
  
