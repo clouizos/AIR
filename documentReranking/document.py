@@ -8,7 +8,7 @@ queriesLeadingToClick = pickle.load(open('../../clickedDocumentsAndQueries_stric
 
 class Document:
 	documentID = 0
-	numberOFClicks = 0
+	numberOfClicks = 0
 	queries = 0
 
 	def __init__(self, id):
