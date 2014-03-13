@@ -14,7 +14,7 @@ class User:
 	clickedDocs = []
 	
 	def __init__(self, userID):
-		print "Creating new user object"
+		print "Creating new user object for ", userID
 		self.userID = userID
 
 		qs = set()
