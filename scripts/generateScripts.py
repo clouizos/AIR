@@ -39,8 +39,9 @@ termFrequencies_test = copy.copy(user_queries_test)
 
 for user in data.keys():
 	
-	half = len(data[user])
+	half = len(data[user]) / 2
 	
+	print "This user has ", len(data[user]), " triplets, we'll switch at ", half
 	for i, triplet in enumerate(data[user]):
 		
 		query = triplet[0]
@@ -48,6 +49,7 @@ for user in data.keys():
 
 		# train
 		if i <= half:
+			print "(", i, ") Train"
 			if user in queries:
 				queriesOfUser = user_queries_train[user]
 				queriesOfUser.append(query)
@@ -66,6 +68,8 @@ for user in data.keys():
 					document_clicks_train[doc] = 1
 		# test
 		else:
+			print "(", i, ") Test"
+
 			if user in queries:
 				queriesOfUser = user_queries_test[user]
 				queriesOfUser.append(triplet[0])
