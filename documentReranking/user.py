@@ -52,7 +52,7 @@ class User:
 
 	def getClickedDocuments(self):
 		clicks = set()
-		userInfo = userQueriesAndClicks_strict[self.id]
+		userInfo = userQueriesAndClicks_strict[self.userID]
 		for infoTriplet in userInfo:
 			c = infoTriplet[1]
 			for d in c:
