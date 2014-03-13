@@ -12,6 +12,7 @@ def add(dic, key, value):
 		theSet.add(value)
 		dic[key] = theSet
 	else:
+		print value
 		dic[key] = set([value])
 	
 	return dic
