@@ -17,6 +17,18 @@ def add(dic, key, value):
 	
 	return dic
 
+
+def add2(dic, key, value):
+	if key in dic:
+		theSet = dic[key]
+		theSet.append(value)
+		dic[key] = theSet
+	else:
+		print value
+		dic[key] = [value]
+	
+	return dic
+
 #userQueries_strict
 user_queries_train = dict()
 user_queries_test = dict()
@@ -61,7 +73,7 @@ for user in data.keys():
 		# train
 		if i <= half:
 			
-			user_specific_positive_negative_examples_dic_train = add(user_specific_positive_negative_examples_dic_train, user, triplet)
+			user_specific_positive_negative_examples_dic_train = add2(user_specific_positive_negative_examples_dic_train, user, triplet)
 
 			if printTrain == False:
 				print "(", i, ") Train"
@@ -85,7 +97,7 @@ for user in data.keys():
 					document_clicks_train[c] = 1
 		# test
 		else:
-			user_specific_positive_negative_examples_dic_test = add(user_specific_positive_negative_examples_dic_test, user, triplet)
+			user_specific_positive_negative_examples_dic_test = add2(user_specific_positive_negative_examples_dic_test, user, triplet)
 
 			if printTest == False:
 				print "(", i, ") Test"
