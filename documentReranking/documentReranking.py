@@ -10,7 +10,6 @@ model = sys.argv[2]
 simMeausre = sys.argv[3]
 numberOfSimilarUsers = int(sys.argv[4])
 
-print "Writing results to ", outputFile, "\n Using user language model model:", model, " and similarity measure : ", simMeausre, "\nRe-ranking is done based on ", numberOfSimilarUsers, " most similar users." 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 
 # gives the ranking score for a document given similarUsers (everything is negative, but higher = better)
@@ -54,7 +53,10 @@ def createReRankingDump():
 			documentsToReRank = userA.queryResults[query]
 
 			ranking = []
+			for tup in mostSimilarUsers:
+				print tup
 			mostSimilarUsers = [(user.User(tup[0]), tup[1]) for tup in mostSimilarUsers]
+
 			for doc in documentsToReRank:
 				
 				# get ranking socre for the document given the mostSimilarUsers
@@ -75,6 +77,7 @@ def createReRankingDump():
 
 	return resultingRanks
 
+print "Writing results to ", outputFile, "\n Using user language model model:", model, " and similarity measure : ", simMeausre, "\nRe-ranking is done based on ", numberOfSimilarUsers, " most similar users." 
 results = createReRankingDump()
 
 pickle.dump(results, open(outputFile, 'wb'))
