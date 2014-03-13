@@ -20,9 +20,8 @@ def getRankingScoreForDocument(similarUsers, document):
 	# the total ranking score if the user actually clicked the documents
 	# if no one clicked the document, set the score to -9999
 	for uB in similarUsers:
-		userID = uB[0]
+		userB = uB[0]
 		similarity = uB[1]
-		userB = user.User(userID)
 		if userB.didClickDocument(document):
 			rank += similarity
 	if rank == 0:
@@ -54,6 +53,7 @@ def createReRankingDump():
 			documentsToReRank = userA.queryResults[query]
 
 			ranking = []
+			mostSimilarUsers = [(user.User(tup[0]), tup[1]) for tup in mostSimilarUsers]
 			for doc in documentsToReRank:
 				
 				# get ranking socre for the document given the mostSimilarUsers
