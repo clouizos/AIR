@@ -15,7 +15,7 @@ import sys
 filename = sys.argv[1]
 print "Testing results from ", filename
 
-userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
+userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_test', 'rb'))
 evaluationFile = pickle.load(open(filename, 'rb'))
 
 class Result:

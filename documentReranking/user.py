@@ -4,8 +4,8 @@ import similarityMeasures as sims
 import pickle
 import time
 
-allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
-userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
+allUsers = pickle.load(open('../../users', 'rb'))['users']
+userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_test', 'rb'))
 
 class User:
 	userID = 0

@@ -10,7 +10,7 @@ model = sys.argv[2]
 simMeausre = sys.argv[3]
 numberOfSimilarUsers = int(sys.argv[4])
 
-allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
+allUsers = pickle.load(open('../../users', 'rb'))['users']
 
 # gives the ranking score for a document given similarUsers (everything is negative, but higher = better)
 

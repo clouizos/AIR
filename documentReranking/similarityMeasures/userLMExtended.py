@@ -5,7 +5,7 @@ import pickle
 
 termFrequencies = pickle.load(open('../../termFrequencies_train', 'rb'))
 userQueries = pickle.load(open('../../userQueries_train', 'rb'))
-userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
+userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_train', 'rb'))
 documents = pickle.load(open('../../documentContents', 'rb'))
 
 class UserLMExtended:

@@ -2,8 +2,8 @@
 # Created by Anouk Visser
 import pickle
 
-documentClicks = pickle.load(open('../../numberOfDocumentClicks_strict', 'rb'))
-queriesLeadingToClick = pickle.load(open('../../clickedDocumentsAndQueries_strict', 'rb'))
+documentClicks = pickle.load(open('../../numberOfDocumentClicks_train', 'rb'))
+queriesLeadingToClick = pickle.load(open('../../clickedDocumentsAndQueries_train', 'rb'))
 
 
 class Document:
