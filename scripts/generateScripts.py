@@ -72,9 +72,9 @@ for user in data.keys():
 				dcq_train = add(dcq_train, c, query)
 				
 				if c in document_clicks_train:
-					document_clicks_train[doc] += 1
+					document_clicks_train[c] += 1
 				else:
-					document_clicks_train[doc] = 1
+					document_clicks_train[c] = 1
 		# test
 		else:
 			if printTest == False:
@@ -94,9 +94,9 @@ for user in data.keys():
 				dcq_test = add(dcq_test, c, query)
 
 				if c in document_clicks_teset:
-					document_clicks_test[doc] += 1
+					document_clicks_test[c] += 1
 				else:
-					document_clicks_test[doc] = 1
+					document_clicks_test[c] = 1
 
 # tHis is the only thing that is not so nice...
 for key in user_queries_train.keys():
