@@ -45,7 +45,6 @@ def createReRankingDump():
 		mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon, model, simMeausre)
 		mostSimilarUsers = [(user.User(tup[0]), tup[1]) for tup in mostSimilarUsers]
 
-
 		queryRankingResults = dict()
 		
 		# get ranking for every query
