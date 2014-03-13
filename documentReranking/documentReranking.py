@@ -8,7 +8,7 @@ import sys
 outputFile = sys.argv[1]
 model = sys.argv[2]
 simMeausre = sys.argv[3]
-numberOfSimilarUsers = sys.argv[4]
+numberOfSimilarUsers = int(sys.argv[4])
 
 print "Writing results to ", outputFile, "\n Using user language model model:", model, " and similarity measure : ", simMeausre, "\nRe-ranking is done based on ", numberOfSimilarUsers, " most similar users." 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
