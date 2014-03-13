@@ -12,6 +12,8 @@ simMeausre = sys.argv[3]
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 
 # gives the ranking score for a document given similarUsers (everything is negative, but higher = better)
+
+# THIS IS VERY INEFFICIENT, it will create new user objects for all the Similar users and that's not good.
 def getRankingScoreForDocument(similarUsers, document):
 	rank = 0
 	# for all users, find the similarity score, add this to 
@@ -73,6 +75,7 @@ def createReRankingDump():
 	return resultingRanks
 
 results = createReRankingDump()
+
 pickle.dump(results, open(outputFile, 'wb'))
 
 

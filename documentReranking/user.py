@@ -14,7 +14,6 @@ class User:
 	clickedDocs = []
 	
 	def __init__(self, userID):
-		print "Creating new user object for ", userID
 		self.userID = userID
 
 		qs = set()
@@ -27,27 +26,9 @@ class User:
 
 	# returns 0/1 depending on whether the user clicked the document
 	def didClickDocument(self, document):
-		start_time = time.time()
-		print "Checking for click!"
-		click = 0
-		userInfo = userQueriesAndClicks_strict[self.userID]
-		for infoTriplet in userInfo:
-			clickedDocs = infoTriplet[1]
-			if document in clickedDocs:
-				click = 1
-				break
-
-		elapsed_time = time.time() - start_time
-		print "Method 1: ", elapsed_time, click
-
-		start_time = time.time()
 		if document in self.clickedDocs:
 			click = 1
-		elapsed_time = time.time() - start_time
-		print "Method 2: ", elapsed_time, click
-
-
-
+			print "Yay, click!"
 		return click
 
 	def getClickedDocuments(self):
