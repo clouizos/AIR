@@ -43,6 +43,7 @@ class User:
 	# THIS SHOULD BE EXTENDED TO FIND MORE FORMS OF SIMILARITY
 	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon, whichModel, whichSim):
 		
+		# default model is the simple model
 		if whichModel == "extended":
 			me = sims.UserLMExtended(self.userID)
 		else:
@@ -52,7 +53,6 @@ class User:
 		actualUserIDs = [-9999 for i in range(numberOfMostSimilarUsers)]
 		for user in allUsers:
 			if user != self.userID:
-				
 				if whichModel == "extended":
 					b = sims.UserLMExtended(self.userID)
 				else:
@@ -60,11 +60,13 @@ class User:
 				
 				filled = False
 
+				# default model is the regular similarity
 				if whichSim == "mutual":
 					similarityScore = sims.mutualSim(me, b, minTermsInCommon)
 				else:
 					similarityScore = sims.sim(me, b, minTermsInCommon)
 				
+				# find the numberOfMostSimilar users.
 				for i in range(len(mostSimilar)):
 					if similarityScore > mostSimilar[i] and filled == False:
 						for j in range(len(mostSimilar)):
@@ -76,6 +78,7 @@ class User:
 						actualUserIDs[i] = user
 						filled = True
 
+		# We don't want to return things that weren't set, so if we don't meed the numberOfMostSimilarUsers requirement, never mind
 		returnList = [(actualUserIDs[i], mostSimilar[i]) for i in range(len(mostSimilar)) if actualUserIDs[i] != -9999]
 
 		return returnList
