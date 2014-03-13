@@ -40,7 +40,8 @@ class User:
 			if user != self.userID:
 				filled = False
 				# HERE WE CAN CALL VIRTUALLY ANY SIMILARITY| FUNCTION, how will we set this up?
-				similarityScore = sims.mutualSimExtended(self.userID, user, minTermsInCommon)
+				similarityScore = sims.sim(sims.UserLM(self.userID), sims.UserLM(user), minTermsInCommon)
+				print similarityScore
 				for i in range(len(mostSimilar)):
 					if similarityScore > mostSimilar[i] and filled == False:
 						for j in range(len(mostSimilar)):

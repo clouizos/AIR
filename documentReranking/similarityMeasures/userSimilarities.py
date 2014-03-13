@@ -2,10 +2,10 @@ import userLM as user
 import userLMExtended as userExtended
 
 # LOTS OF CODE DUPLICATION HERE!!!
-def sim(userA, userB, minCommonTerms):
+def sim(A, B, minCommonTerms):
 	# create two user objects
-	A = user.UserLM(userA)
-	B = user.UserLM(userB)
+	# A = user.UserLM(userA)
+	# B = user.UserLM(userB)
 	similarityScore = 0
 
 	# check if they have minCommonTerms terms in common

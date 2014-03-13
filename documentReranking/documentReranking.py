@@ -3,9 +3,11 @@
 
 import user as user
 import pickle
+import sys
+
+outputFile = sys.argv[1]
 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
-
 
 # gives the ranking score for a document given similarUsers (everything is negative, but higher = better)
 def getRankingScoreForDocument(similarUsers, document):
@@ -68,7 +70,7 @@ def createReRankingDump():
 	return resultingRanks
 
 results = createReRankingDump()
-pickle.dump(results, open('../../mutualSimExtended_strict_ranking_results', 'wb'))
+pickle.dump(results, open(outputFile, 'wb'))
 
 
 
