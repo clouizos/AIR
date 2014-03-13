@@ -39,6 +39,10 @@ document_clicks_test = dict()
 termFrequencies_train = copy.copy(user_queries_train)
 termFrequencies_test = copy.copy(user_queries_test)   
 
+# user_specific_positive_negative_examples_dic_strict
+user_specific_positive_negative_examples_dic_train = dict()
+user_specific_positive_negative_examples_dic_test = dict()
+
 print "Starting!"
 for user in data.keys():
 	
@@ -48,13 +52,16 @@ for user in data.keys():
 	
 	print "This user has ", len(data[user]), " triplets, we'll switch at ", half
 	for i, triplet in enumerate(data[user]):
-		
+
+
 		query = triplet[0]
 		clicks = triplet[1]
 
 		# train
 		if i <= half:
 			
+			user_specific_positive_negative_examples_dic_train = add(user_specific_positive_negative_examples_dic_train, user, triplet)
+
 			if printTrain == False:
 				print "(", i, ") Train"
 				printTrain = True
@@ -77,6 +84,8 @@ for user in data.keys():
 					document_clicks_train[c] = 1
 		# test
 		else:
+			user_specific_positive_negative_examples_dic_test = add(user_specific_positive_negative_examples_dic_test, user, triplet)
+
 			if printTest == False:
 				print "(", i, ") Test"
 				printTest = True
@@ -114,10 +123,12 @@ for key in user_queries_test.keys():
 	termFrequencies_test[key] = queryFrequency
 
 
-
-
 print "userQueries: ", len(user_queries_train), len(user_queries_test)
 print "termFrequencies: ", len(termFrequencies_train), len(termFrequencies_test)
+print "Big thing: ", len(user_specific_positive_negative_examples_dic_test), len(user_specific_positive_negative_examples_dic_train)
+
+if user_queries_train == user_queries_test or termFrequencies_test == termFrequencies_train or user_specific_positive_negative_examples_dic_test == user_specific_positive_negative_examples_dic_train:
+	print "PANIC!!"
 
 pickle.dump(user_queries_train, open('../../userQueries_train', 'wb'))
 pickle.dump(user_queries_test, open('../../userQueries_test', 'wb'))
@@ -134,6 +145,9 @@ pickle.dump(document_clicks_test, open('../../numberOfDocumentClicks_test', 'wb'
 pickle.dump(termFrequencies_train, open('../../termFrequencies_train', 'wb'))
 pickle.dump(termFrequencies_test, open('../../termFrequencies_test', 'wb'))
 
+
+pickle.dump(user_specific_positive_negative_examples_dic_train, open('../../user_specific_positive_negative_examples_dic_train', 'wb'))
+pickle.dump(user_specific_positive_negative_examples_dic_test, open('../../user_specific_positive_negative_examples_dic_test', 'wb'))
 
 
 
