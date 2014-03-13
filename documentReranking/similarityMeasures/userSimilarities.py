@@ -1,11 +1,8 @@
 import userLM as user
 import userLMExtended as userExtended
 
-# LOTS OF CODE DUPLICATION HERE!!!
 def sim(A, B, minCommonTerms):
-	# create two user objects
-	# A = user.UserLM(userA)
-	# B = user.UserLM(userB)
+	print "Regular"
 	similarityScore = 0
 
 	# check if they have minCommonTerms terms in common
@@ -20,55 +17,8 @@ def sim(A, B, minCommonTerms):
 
 	return  similarityScore
 
-def mutualSim(userA, userB, minCommonTerms):
-	A = user.UserLM(userA)
-	B = user.UserLM(userB)
-	similarityScoreAB = 0
-	similarityScoreBA = 0
-
-	# check if they have minCommonTerms terms in common
-	# if not, return 0
-	if A.termsInCommon(B) > minCommonTerms:
-		# calculate the similarity A -> B
-		for query in A.queries:
-			# !! not very efficient since users are expected to have many duplicate queries... 
-			similarityScoreAB += B.p_q_u(query)
-		similarityScoreAB = similarityScoreAB / A.numberOfQueries
-
-		for query in B.queries:
-			similarityScoreBA += A.p_q_u(query)
-		similarityScoreBA = similarityScoreBA / B.numberOfQueries
-	
-	else:
-		similarityScoreAB = -9999
-		similarityScoreBA = -9999
-
-	return similarityScoreAB + similarityScoreBA
-
-def simExtended(userA, userB, minCommonTerms):
-	# create two user objects
-	A = userExtended.UserLMExtended(userA)
-	B = userExtended.UserLMExtended(userB)
-	similarityScore = 0
-
-	# check if they have minCommonTerms terms in common
-	# if not, return 0
-	if A.termsInCommon(B) > minCommonTerms:
-		# calculate the similarity
-		for query in A.queries:
-			similarityScore += B.p_q_u(query)
-		similarityScore = similarityScore / A.numberOfQueries
-	else:
-		similarityScore = -9999
-
-	return  similarityScore
-
-# input is just the userID as a string
-def mutualSimExtended(userA, userB, minCommonTerms):
-	
-	A = userExtended.UserLMExtended(userA)
-	B = userExtended.UserLMExtended(userB)
-	
+def mutualSim(A, B, minCommonTerms):
+	print "Mutual"
 	similarityScoreAB = 0
 	similarityScoreBA = 0
 

@@ -33,15 +33,30 @@ class User:
 		return click
 	
 	# THIS SHOULD BE EXTENDED TO FIND MORE FORMS OF SIMILARITY
-	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon):
+	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon, whichModel, whichSim):
+		
+		if whichModel == "extended":
+			me = sims.UserLMExtended(self.userID)
+		else:
+			me = sims.UserLM(self.userID)
+
 		mostSimilar = [-9999 for i in range(numberOfMostSimilarUsers)]
 		actualUserIDs = [-9999 for i in range(numberOfMostSimilarUsers)]
 		for user in allUsers:
 			if user != self.userID:
+				
+				if whichModel == "extended":
+					b = sims.UserLMExtended(self.userID)
+				else:
+					b = sims.UserLM(self.userID)
+				
 				filled = False
-				# HERE WE CAN CALL VIRTUALLY ANY SIMILARITY| FUNCTION, how will we set this up?
-				similarityScore = sims.sim(sims.UserLM(self.userID), sims.UserLM(user), minTermsInCommon)
-				print similarityScore
+
+				if whichSim == "mutual":
+					similarityScore = sims.mutalSim(me, b, minTermsInCommon)
+				else:
+					similarityScore = sims.sim(me, b, minTermsInCommon)
+				
 				for i in range(len(mostSimilar)):
 					if similarityScore > mostSimilar[i] and filled == False:
 						for j in range(len(mostSimilar)):

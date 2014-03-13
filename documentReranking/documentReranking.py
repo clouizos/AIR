@@ -6,6 +6,8 @@ import pickle
 import sys
 
 outputFile = sys.argv[1]
+model = sys.argv[2]
+simMeausre = sys.argv[3]
 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 
@@ -38,7 +40,7 @@ def createReRankingDump():
 		userA = user.User(userID)
 
 		# get mostSimilar users
-		mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon)
+		mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon, model, simMeausre)
 
 		queryRankingResults = dict()
 		
