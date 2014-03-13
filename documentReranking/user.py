@@ -53,7 +53,7 @@ class User:
 				filled = False
 
 				if whichSim == "mutual":
-					similarityScore = sims.mutalSim(me, b, minTermsInCommon)
+					similarityScore = sims.mutualSim(me, b, minTermsInCommon)
 				else:
 					similarityScore = sims.sim(me, b, minTermsInCommon)
 				
