@@ -1,7 +1,9 @@
 # This does everything you need!
-from user_specific_positive_negative_examples_dic_strict import dictionary as data
 import pickle 
 import copy as copy
+
+print "Opening the big data file!"
+data = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
 
 
 def add(dic, key, value):
@@ -37,9 +39,12 @@ document_clicks_test = dict()
 termFrequencies_train = copy.copy(user_queries_train)
 termFrequencies_test = copy.copy(user_queries_test)   
 
+print "Starting!"
 for user in data.keys():
 	
 	half = len(data[user]) / 2
+	printTrain = False
+	printTest = False
 	
 	print "This user has ", len(data[user]), " triplets, we'll switch at ", half
 	for i, triplet in enumerate(data[user]):
@@ -49,7 +54,11 @@ for user in data.keys():
 
 		# train
 		if i <= half:
-			print "(", i, ") Train"
+			
+			if printTrain == False:
+				print "(", i, ") Train"
+				printTrain = True
+
 			if user in queries:
 				queriesOfUser = user_queries_train[user]
 				queriesOfUser.append(query)
@@ -68,7 +77,9 @@ for user in data.keys():
 					document_clicks_train[doc] = 1
 		# test
 		else:
-			print "(", i, ") Test"
+			if printTest == False:
+				print "(", i, ") Test"
+				printTest = True
 
 			if user in queries:
 				queriesOfUser = user_queries_test[user]
@@ -108,20 +119,20 @@ for key in user_queries_test.keys():
 print "userQueries: ", len(user_queries_train), len(user_queries_test)
 print "termFrequencies: ", len(termFrequencies_train), len(termFrequencies_test)
 
-pickle.dump(user_queries_train, open('userQueries_train', 'wb'))
-pickle.dump(user_queries_test, open('userQueries_test', 'wb'))
+pickle.dump(user_queries_train, open('../../userQueries_train', 'wb'))
+pickle.dump(user_queries_test, open('../../userQueries_test', 'wb'))
 
-pickle.dump(queries_train, open('queries_train', 'wb'))
-pickle.dump(queries_test, open('queries_test', 'wb'))
+pickle.dump(queries_train, open('../../queries_train', 'wb'))
+pickle.dump(queries_test, open('../../queries_test', 'wb'))
 
-pickle.dump(dcq_train, open('clickedDocumentsAndQueries_train', 'wb'))
-pickle.dump(dcq_test, open('clickedDocumentsAndQueries_test', 'wb'))
+pickle.dump(dcq_train, open('../../clickedDocumentsAndQueries_train', 'wb'))
+pickle.dump(dcq_test, open('../../clickedDocumentsAndQueries_test', 'wb'))
 
-pickle.dump(document_clicks_train, open('numberOfDocumentClicks_train', 'wb'))
-pickle.dump(document_clicks_test, open('numberOfDocumentClicks_test', 'wb'))
+pickle.dump(document_clicks_train, open('../../numberOfDocumentClicks_train', 'wb'))
+pickle.dump(document_clicks_test, open('../../numberOfDocumentClicks_test', 'wb'))
 
-pickle.dump(termFrequencies_train, open('termFrequencies_train', 'wb'))
-pickle.dump(termFrequencies_test, open('termFrequencies_test', 'wb'))
+pickle.dump(termFrequencies_train, open('../../termFrequencies_train', 'wb'))
+pickle.dump(termFrequencies_test, open('../../termFrequencies_test', 'wb'))
 
 
 
