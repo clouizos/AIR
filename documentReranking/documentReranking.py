@@ -8,7 +8,9 @@ import sys
 outputFile = sys.argv[1]
 model = sys.argv[2]
 simMeausre = sys.argv[3]
+numberOfSimilarUsers = sys.argv[4]
 
+print "Writing results to ", outputFile, "\n Using user language model model:", model, " and similarity measure : ", simMeausre, "\nRe-ranking is done based on ", numberOfSimilarUsers, " most similar users." 
 allUsers = pickle.load(open('../../users_strict', 'rb'))['users']
 
 # gives the ranking score for a document given similarUsers (everything is negative, but higher = better)
@@ -31,7 +33,6 @@ def getRankingScoreForDocument(similarUsers, document):
 def createReRankingDump():
 	resultingRanks = dict()
 
-	numberOfSimilarUsers = 25
 	minTermsInCommon = 5
 	counter = 0
 	for userID in allUsers:
