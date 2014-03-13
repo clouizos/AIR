@@ -36,6 +36,7 @@ def createReRankingDump():
 	for userID in allUsers:
 		counter += 1
 		print "Working on user ", counter
+		
 		# take a user
 		userA = user.User(userID)
 

@@ -23,6 +23,7 @@ class User:
 
 	# returns 0/1 depending on whether the user clicked the document
 	def didClickDocument(self, document):
+		print "checking for click"
 		click = 0
 		userInfo = userQueriesAndClicks_strict[self.userID]
 		for infoTriplet in userInfo:
@@ -30,6 +31,7 @@ class User:
 			if document in clickedDocs:
 				click = 1
 				break
+		print "done"
 		return click
 	
 	# THIS SHOULD BE EXTENDED TO FIND MORE FORMS OF SIMILARITY
