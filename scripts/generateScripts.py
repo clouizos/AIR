@@ -59,7 +59,7 @@ for user in data.keys():
 				print "(", i, ") Train"
 				printTrain = True
 
-			if user in queries:
+			if user in user_queries_train:
 				queriesOfUser = user_queries_train[user]
 				queriesOfUser.append(query)
 				user_queries_train[user] = queriesOfUser
@@ -81,7 +81,7 @@ for user in data.keys():
 				print "(", i, ") Test"
 				printTest = True
 
-			if user in queries:
+			if user in user_queries_test:
 				queriesOfUser = user_queries_test[user]
 				queriesOfUser.append(triplet[0])
 				user_queries_test[user] = queriesOfUser
