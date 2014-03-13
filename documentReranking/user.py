@@ -26,6 +26,7 @@ class User:
 
 	# returns 0/1 depending on whether the user clicked the document
 	def didClickDocument(self, document):
+		click = 0
 		if document in self.clickedDocs:
 			click = 1
 			print "Yay, click!"
