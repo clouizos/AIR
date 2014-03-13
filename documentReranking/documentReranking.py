@@ -54,7 +54,7 @@ def createReRankingDump():
 
 			ranking = []
 			for tup in mostSimilarUsers:
-				print tup
+				print "Hallo!", tup
 			mostSimilarUsers = [(user.User(tup[0]), tup[1]) for tup in mostSimilarUsers]
 
 			for doc in documentsToReRank:
@@ -77,7 +77,7 @@ def createReRankingDump():
 
 	return resultingRanks
 
-print "Writing results to ", outputFile, "\n Using user language model model:", model, " and similarity measure : ", simMeausre, "\nRe-ranking is done based on ", numberOfSimilarUsers, " most similar users." 
+print "Writing results to ", outputFile, "\Language Model:", model, "\nSimilarity Measure: ", simMeausre, "\nRe-ranking is done based on ", numberOfSimilarUsers, " most similar users." 
 results = createReRankingDump()
 
 pickle.dump(results, open(outputFile, 'wb'))
