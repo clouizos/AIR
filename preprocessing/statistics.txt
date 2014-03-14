@@ -1,0 +1,113 @@
+Total number of user : 918
+Number of users with at least one query : 874
+Number of users with more than one query : 874
+Average number of query per user : 207.357298475
+Number of users with at least one click : 789
+Number of users with more than one click : 721
+Number of users with more than one unique click : 706
+Average click per user : 84.8050108932
+Average unique click per user : 68.6132897603
+Number of users with at least one purchase: 517
+Number of users with more than one purchase: 459
+Average purchase per user : 23.2298474946
+Number of query : 189479
+Number of query with at least one click : 45323
+Average click per query : 0.410325154766
+Number of documents clicked at least once :50781
+Number of documents was clicked at least by 2 different users :8327
+Top10 users with highest number of query:
+#	UserID
+10445	UID1536
+4159	UID949
+3441	UID7
+3396	UID76
+3114	UID1287
+2973	UID46
+2957	UID144
+2847	UID474
+2050	UID1495
+1994	UID1325
+Top10 users with highest number of click:
+#	UserID
+4292	UID1536
+1802	UID7
+1602	UID76
+1214	UID1325
+1134	UID474
+1107	UID482
+1098	UID1039
+1036	UID288
+1006	UID1424
+937	UID144
+Top10 users with highest number of unique click:
+#	UserID
+3111	UID1536
+1556	UID7
+1388	UID76
+1131	UID1325
+954	UID474
+929	UID482
+929	UID1039
+904	UID1424
+859	UID288
+813	UID546
+Top10 users with highest number of order:
+#	UserID
+616	UID1472
+598	UID7
+566	UID1024
+539	UID76
+522	UID1287
+458	UID256
+443	UID949
+419	UID1113
+387	UID349
+356	UID60
+Top10 viewed documents :
+#	DocID:
+1063	3914718
+895	4209778
+893	4209882
+893	4209775
+723	4209765
+709	4209762
+698	4209832
+663	4209600
+608	4209827
+607	4209812
+Top10 clicked documents :
+#	DocID:
+41	4192324
+24	4093082
+23	4173437
+22	4093094
+22	3914718
+21	130194
+19	431091
+19	211382
+18	16817
+17	4196177
+Top10 clicked documents by unique user:
+#	DocID:
+21	4192324
+18	4093082
+15	3914718
+14	4093058
+14	430273
+13	88884
+12	431091
+12	4173437
+11	4093094
+11	4189522
+Top10 ordered documents :
+#	DocID:
+28	4192324
+26	4037374
+23	4024901
+19	4173217
+19	4093094
+18	4093113
+15	4095586
+14	93257571
+14	4192542
+13	430622

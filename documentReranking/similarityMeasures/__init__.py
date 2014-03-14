@@ -1,3 +1,3 @@
 # init
 
-from simpleUserLM import sim as simpleUserLMSimilarity
+import userSimilarity as userSimilarity

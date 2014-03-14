@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division 
 from scipy.stats import norm
 import numpy as np
 import matplotlib.pyplot as plt
