@@ -8,6 +8,7 @@ from rankSVM import RankSVM
 from sklearn.decomposition import DictionaryLearning
 from sklearn.cross_validation import train_test_split
 from natsort import natsorted
+import multiprocessing as mpc
 
 # estimate the query features
 # according to the top documents
@@ -24,32 +25,90 @@ def query_features(queries, reference, nr_rel_docs, total_features, dataq):
         cnt += 1
     return data
 
+def get_dic_per_cluster(clust_q, data_cluster, dataq, i, out_q = None):
+    if out_q is not None:
+        name = mpc.current_process().name
+        print name, 'Starting'
+    else:
+        print 'Starting estimation of dic %i...' % i
+    # parse the feature vectors for each cluster
+    for q in clust_q:
+        data_cluster = np.vstack((data_cluster,dataq[q]))
+    # remove useless first line
+    data_cluster = data_cluster[1:,:]
+    # learn the sparse code for that cluster
+    dict_learn = DictionaryLearning()
+    dict_learn.fit(data_cluster)
+    if out_q is not None:
+        out_q.put(dict(i = dict_learn))
+        print name, 'Exiting'
+    else:
+        return dict(i = dict_learn)
+
+
 # parse the set of atoms for each cluster
 # in order to represent the data under that cluster
 # with a cluster specific sparse code
-def create_dics(each_cluster, dataq, train, total_features = 64):
+def create_dics(each_cluster, dataq, train, total_features = 64, parallel = False):
     dics = []
-    for cluster in each_cluster:
+    if parallel:
+        processes = []
+        out_q = mpc.Queue()
+
+    result = {}
+    for i in xrange(len(each_cluster)):
         # get the queries in that cluster
-        clust_q = train[cluster[:]]
+        clust_q = train[each_cluster[i][:]]
         data_cluster = np.zeros((1, total_features))
-        # parse the feature vectors for each cluster
-        for q in clust_q:
-            data_cluster = np.vstack((data_cluster,dataq[q]))
-        # remove useless first line
-        data_cluster = data_cluster[1:,:]
-        # learn the sparse code for that cluster
-        dict_learn = DictionaryLearning(transform_algorithm='lasso_cd')
-        dict_learn.fit(data_cluster)
-        dics.append(dict_learn)
+        if parallel:
+            args = (clust_q, data_cluster, dataq, i, out_q)
+
+            p = mpc.Process(name='dic_cluster_%i' % i, target=get_dic_per_cluster, args=args)
+            processes.append(p)
+            p.start()
+        else:
+            result.update(get_dic_per_cluster(clust_q, data_cluster, dataq, i))
+
+    if parallel:
+        # wait for the processes
+        for process in processes:
+            process.join()
+
+        # parse the results
+        for i in xrange(len(each_cluster)):
+            result.update(out_q.get())
+
+    # add the dictionaries with the order we have for the clusters
+    for key in natsorted(result.keys()):
+        dics.append(result[key])
 
     return dics
 
+def train(data_cluster, labels_cluster, dic, i, out_q = None):
+    if out_q is not None:
+        name = mpc.current_process().name
+        print name, 'Starting'
+    else:
+        print 'Training for cluster %i...' % i
+    # encode the features according to the dictionary of that cluster
+    data_cluster = dic.transform(data_cluster)
+    # train the classifier and add it to the list of the ensemble
+    ranksvm = RankSVM().fit(data_cluster, labels_cluster)
+    if out_q is not None:
+        out_q.put(dict(i = ranksvm))
+        print name, 'Exiting'
+    else:
+        return dict(i = ranksvm)
+
+
 # train an ensemble of classifiers
 # one according to each cluster
-def train_ensemble(each_cluster, dataq, labelq, train, dics, total_features = 64):
+def train_ensemble(each_cluster, dataq, labelq, train, dics, total_features = 64, parallel = False):
     ensemble = []
-
+    if parallel:
+        processes = []
+        out_q = mpc.Queue()
+    result = {}
     for i in xrange(len(each_cluster)):
         # get the queries for that cluster
         clust_q = train[each_cluster[i][:]]
@@ -63,13 +122,28 @@ def train_ensemble(each_cluster, dataq, labelq, train, dics, total_features = 64
         # remove the useless first entries
         data_cluster = data_cluster[1:,:]
         labels_cluster = labels_cluster[1:]
+        dic_i = dics[i]
+        if parallel:
+            args = (data_cluster, labels_cluster, dic_i, i, out_q)
 
-        # encode the features according to the dictionary of that cluster
-        data_cluster = dics[i].transform(data_cluster)
+            p = mpc.Process(name='train_cluster_%i' % i, target=train, args=args)
+            processes.append(p)
+            p.start()
+        else:
+            result.update(train(data_cluster, labels_cluster, dic_i, i))
 
-        # train the classifier and add it to the list of the ensemble
-        ranksvm = RankSVM().fit(data_cluster, labels_cluster)
-        ensemble.append(ranksvm)
+    if parallel:
+        # wait for the processes
+        for process in processes:
+            process.join()
+
+        # parse the results
+        for i in xrange(len(each_cluster)):
+            result.update(out_q.get())
+
+    # add the dictionaries with the order we have for the clusters
+    for key in natsorted(result.keys()):
+        ensemble.append(result[key])
 
     return ensemble
 
@@ -153,17 +227,19 @@ def get_ndcg(ranked_list_per_q, labelsq, rel_k):
 if __name__ == '__main__':
     #ld.get_letor_3(64)
     #data_total_raw = ld.load_pickle('','data_cluster.pickle')
-
+    print 'Parsing the data...'
     data, labels = ld.load_pickle_total('', 'data_per_q_total.pickle', 'relevance_per_q_total.pickle')
 
     queries = np.asanyarray(natsorted(data.keys()), dtype=object)
 
-    train, test = train_test_split(queries, test_size=0.33, random_state=42)
-    print 'Training set size: %i, Testing set size: %i' % (train.shape[0], test.shape[0])
+    training, testing = train_test_split(queries, test_size=0.33, random_state=42)
+    print 'Training set size: %i, Testing set size: %i' % (training.shape[0], testing.shape[0])
 
-    data_cluster_train = query_features(train, 24, 50, 64, data)
-    data_cluster_test = query_features(test, 24, 50, 64, data)
+    print 'Estimating query features...'
+    data_cluster_train = query_features(training, 24, 50, 64, data)
+    data_cluster_test = query_features(testing, 24, 50, 64, data)
 
+    print 'Calculating dissimilarity space for training queries...'
     data_cluster_train_ds = sc.pdist(data_cluster_train, 'mahalanobis')
     data_cluster_train_ds = sc.squareform(data_cluster_train_ds)
 
@@ -172,6 +248,7 @@ if __name__ == '__main__':
     plt.colorbar()
     plt.title('Initial dissimilarity')
 
+    print 'Training a Dirichlet Process Gaussian Mixture model...'
     dpgmm = DPGMM(covariance_type='diag', alpha=2.0, n_iter=1000, n_components=10)
     dpgmm.fit(data_cluster_train_ds)
     prediction = dpgmm.predict(data_cluster_train_ds)
@@ -200,27 +277,31 @@ if __name__ == '__main__':
     plt.title('Clustered dissimilarity')
     plt.show()
 
+    print 'Estimating dissimilarity of testing queries to the training ones...'
     test_dis = parse_test_dis(data_cluster_train, data_cluster_test)
+    print 'Estimating probabilities of belonging to the clusters...'
     estimates = estimate_cluster_prob(test_dis, dpgmm, clusters)
-
-    print test_dis.shape
-    print estimates.shape
 
     # here we will create a sparse coding representation
     # for each cluster
-    dics = create_dics(each_cluster, data, train)
+    print 'Create sparse vector dictionaries per cluster...'
+    dics = create_dics(each_cluster, data, training)
 
 
     # train the ensemble according to those dictionaries
-    ensemble = train_ensemble(each_cluster, data, labels, train, dics)
+    print 'Training an ensemble of classifiers...'
+    ensemble = train_ensemble(each_cluster, data, labels, training, dics)
 
     # prediction for the testing queries
-    predictions_per_q = predict_ensemble(ensemble, dics, estimates, test, data)
+    print 'Getting predictions for the testing queries from the ensemble...'
+    predictions_per_q = predict_ensemble(ensemble, dics, estimates, testing, data)
 
     # aggregate the results to get the final rankings
+    print 'Aggregating the results...'
     ranked_list_per_q = find_final_ranking(predictions_per_q)
 
     # get the total ndcg at rel_k places
+    print 'Estimating the NDCG scores...'
     rel_k = [1,2,3,5,10]
     ndcg = get_ndcg(ranked_list_per_q, labels, rel_k)
 
