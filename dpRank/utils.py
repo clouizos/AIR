@@ -6,6 +6,9 @@ from natsort import natsorted
 import math, itertools, random
 from scipy.optimize import check_grad
 
+# we will take log(0) = -Inf so turn off this warning
+np.seterr(divide='ignore')
+
 
 class random_normal:
     mean = 0
@@ -163,8 +166,8 @@ def eval_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click
 
     # likelihoods given query and click list
     sec_term = 0
-    for query in natsorted(component):
-        for user in natsorted(users):
+    for query in component:
+        for user in users:
             # if user has that query
             if query in user_q[user]:
                 sec_term += joint_q_d(theta_k, queries[query], click_list[user+':'+query], docs, T)
@@ -176,12 +179,14 @@ def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, 
     #beta_k = theta_k[2*T:]
     grad = np.zeros(beta_k.shape[0])
     alpha0_squared = prior_params[0] ** 2
-    for i in range(beta_k.shape[0]):
-        grad[i] = -beta_k[i]/alpha0_squared
-    for query in natsorted(component):
-        for user in natsorted(users):
+    grad = -beta_k/alpha0_squared
+    #for i in range(beta_k.shape[0]):
+    #    grad[i] = -beta_k[i]/alpha0_squared
+    for query in component:
+        for user in users:
             # if user has that query
             if query in user_q[user]:
+            #try:
                 user_specific_click_list = click_list[user+':'+query]
 
                 # get the corresponding clicks and non clicks
@@ -202,6 +207,8 @@ def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, 
                 # if there was such a combination
                 if len(pair_prefs) >= 1:
                     grad += np.sum(pair_prefs, axis = 0)
+            #except:
+            #    pass
 
     return grad
 
@@ -222,6 +229,7 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
     #                                       beta_k, *args))
 
     for i in range(iterations):
+        print 'iteration %i' %i
         old_theta_k = chain[len(chain) - 1]
         old_energy = -eval_loglike_theta(old_theta_k[2*T:], old_theta_k, queries,
                         component, users, user_q, user_clicks, docs, prior_params)
@@ -242,6 +250,7 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
         new_beta_k = new_theta_k[2*T:]
         # Do 5 Leapfrog steps.
         for tau in range(5):
+            print 'leap %i' %tau
             # make half step in p
             p = p - stepsize*new_grad/2.0
             # make full step in alpha,
@@ -252,8 +261,7 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
             # compute new gradient
             new_grad = -eval_grad_loglike_theta(new_beta_k, new_theta_k, queries, component,
                                                 users, user_q, user_clicks, docs, prior_params)
-            #if new_grad == 0:
-            #    new_grad = 10 ** (-50)
+
             # make half step in p
             p = p - stepsize*new_grad/2.0
 

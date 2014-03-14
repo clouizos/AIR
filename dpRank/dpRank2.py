@@ -4,7 +4,7 @@ import numpy as np
 from genDummyData import gen_dummy
 from natsort import natsorted
 import utils as u
-import pymc
+from pymc import dirichlet_expval
 from copy import deepcopy
 import multiprocessing as mpc
 import cPickle as pickle
@@ -27,9 +27,9 @@ class user_q_assign:
     def __init__(self, user, queries, user_clicks, K):
         #self.q_assign = np.zeros((len(queries), K))
         self.user_name = user
-        self.queries = list(queries)
+        self.queries = natsorted(list(queries))
         self.assign = np.zeros(len(queries), dtype=int)
-        for i in xrange(len(natsorted(self.queries))):
+        for i in xrange(len(queries)):
             self.click_list[self.queries[i]] = user_clicks[user+':'+self.queries[i]]
             # random assignment of the user queries to groups
             self.assign[i] = int(np.random.choice(K))
@@ -46,17 +46,18 @@ class user_q_assign:
 
 
 def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamma_e, docs, K, prior_params):
+    print 'Sampling assignments...'
     T = prior_params[3]
     # for each user
-    for user_check in natsorted(user_q):
+    for user_check in user_q:
         user = users_objects[user_check]
         # for each query of the user sample the assingments
-        for i in xrange(len(natsorted(user.queries))):
+        for i in xrange(len(user.queries)):
             # for each group
             assign_group = np.zeros(K)
             for k in xrange(K):
                 mu_uk_minus_current = 0
-                for j in xrange(len(natsorted(user.queries))):
+                for j in xrange(len(user.queries)):
                     if j != i:
                         if user.assign[j] == k:
                             mu_uk_minus_current += 1
@@ -84,7 +85,7 @@ def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamm
     # get the observations
     occ_k = np.zeros(K, dtype=int)
     occ_aux = 0
-    for user_check in natsorted(user_q):
+    for user_check in users_objects:
         for elem in users_objects[user_check].assign:
             #auxiliary
             if elem == K:
@@ -127,6 +128,7 @@ def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamm
 
 
 def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
+    print 'Sampling gammas...'
     #name = mpc.current_process().name
     #print name, 'Starting'
 
@@ -136,8 +138,9 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
     m_uik = np.zeros((len(user_q), K), dtype = int)
 
     # find the m_uik for every user
+    users_ = natsorted(users_objects)
     cnt = 0
-    for user_check in natsorted(users_objects):
+    for user_check in users_:
         m_uik[cnt,:] = np.bincount(users_objects[user_check].assign, minlength=K)
         cnt += 1
 
@@ -145,7 +148,7 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
     # it seems that we need to sample h first
     # and based on that we sample gamma
     h_uik = np.zeros((len(user_q), K))
-    for i in xrange(len(user_q)):
+    for i in xrange(len(users_)):
         for j in xrange(K):
             # do not keep the first value (0) since
             # the stirling1 will produce 0 so it doesn't
@@ -173,7 +176,7 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
 
     # take the expectation or a random one from that dirichlet?
     #g = np.random.dirichlet(dir_params)
-    g = pymc.dirichlet_expval(dir_params)
+    g = dirichlet_expval(dir_params)
 
     gamma_k = g[:-1]
     gamma_e = g[-1]
@@ -188,7 +191,7 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
 
 
 def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, out_q = None):
-
+    print 'Sampling thetas...'
     #name = mpc.current_process().name
     #print name, 'Starting'
 
@@ -259,7 +262,7 @@ def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, pri
         # begin the update for the weights beta_c
         users = []
         queries_check = set(queries_of_k)
-        for user in natsorted(user_q):
+        for user in user_q:
             if len(set(user_q[user]).intersection(queries_check)) >= 1:
                 users.append(user)
 
