@@ -45,6 +45,7 @@ class User:
 		
 		# default model is the simple model
 		if whichModel == "extended":
+		#	print "extended"
 			me = sims.UserLMExtended(self.userID)
 		else:
 			me = sims.UserLM(self.userID)
@@ -62,6 +63,7 @@ class User:
 
 				# default model is the regular similarity
 				if whichSim == "mutual":
+				#	print "mutual"
 					similarityScore = sims.mutualSim(me, b, minTermsInCommon)
 				else:
 					similarityScore = sims.sim(me, b, minTermsInCommon)
