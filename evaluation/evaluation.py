@@ -78,7 +78,7 @@ def test():
 		overallMAPRandom += mapRandom
 		overallMap += map
 	
-		print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
+		#print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
 	overallMAPRandom = overallMAPRandom / float(len(userQueriesAndClicks_strict.keys()))
 	overallMap = overallMap / float(len(userQueriesAndClicks_strict.keys()))
 	print "Overall map = ", overallMap, " (random = ", overallMAPRandom, ")"
