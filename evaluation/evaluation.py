@@ -9,7 +9,14 @@
 
 import pickle
 from random import shuffle
-userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_strict', 'rb'))
+import sys
+
+
+filename = sys.argv[1]
+print "Testing results from ", filename
+
+userQueriesAndClicks_strict = pickle.load(open('../../user_specific_positive_negative_examples_dic_test', 'rb'))
+evaluationFile = pickle.load(open(filename, 'rb'))
 
 class Result:
 	queryResults = 0
@@ -46,18 +53,35 @@ class Result:
 
 # test the test, haha
 def test():
+	overallMAPRandom = 0
+	overallMap = 0
 	for user in userQueriesAndClicks_strict.keys():
 		userInfo = userQueriesAndClicks_strict[user]
 		res = Result(user)
+		mapRandom = 0
 		map = 0
 		for infoTriplet in userInfo:
-			# get a ranking for the query (now we're just taking a random I guess)
+			
+			# get a random ranking for the query 
 			ranking = res.randomResults[infoTriplet[0]]
-			# ranking = res.allDocuments[infoTriplet[0]]
+			relevanceJudgementsRANDOM = res.turnIntoBinaryRelevanceThing(infoTriplet[0], ranking)
+			
+			# get the raking from the evaluation file
+			ranking = evaluationFile[user][infoTriplet[0]]
 			relevanceJudgements = res.turnIntoBinaryRelevanceThing(infoTriplet[0], ranking)
+
+			mapRandom += averagePrecision(relevanceJudgementsRANDOM)
 			map += averagePrecision(relevanceJudgements)
+	
+		mapRandom = mapRandom / float(len(userInfo))
 		map = map / float(len(userInfo))
-		print "Map for user ", user, " is ", map
+		overallMAPRandom += mapRandom
+		overallMap += map
+	
+		print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
+	overallMAPRandom = overallMAPRandom / float(len(userQueriesAndClicks_strict.keys()))
+	overallMap = overallMap / float(len(userQueriesAndClicks_strict.keys()))
+	print "Overall map = ", overallMap, " (random = ", overallMAPRandom, ")"
 
 # Calculates precision at rank len(relevanceJudgements) (so the caller should provide the right k already)
 # input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
