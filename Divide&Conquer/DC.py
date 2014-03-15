@@ -224,6 +224,32 @@ def get_ndcg(ranked_list_per_q, labelsq, rel_k):
             ndcg[i] += dcg_q/ideal_dcg
     return ndcg
 
+# write the data in LambdaMART format
+def create_txt_files(training, testing, data, labels, q_to_id, num_feat = 64):
+    towrite_train = np.zeros((1, num_feat + 3), dtype=object)
+    towrite_test = np.zeros((1, num_feat + 3), dtype=object)
+
+    for q in training:
+        dataq = np.asfarray(data[q])
+        qs = np.empty(dataq.shape[0], dtype = int).reshape((dataq.shape[0], 1))
+        qs[:] = q_to_id[q]
+        labels_ = np.asarray(labels[q], dtype=int).reshape((dataq.shape[0], 1))
+        doc_ids = np.asarray(range(dataq.shape[0]), dtype = int).reshape((dataq.shape[0], 1))
+        towrite_train = np.vstack((towrite_train, np.hstack((labels_,qs,doc_ids,dataq))))
+    towrite_train = towrite_train[1:,:]
+
+    for q in testing:
+        dataq = np.asfarray(data[q])
+        qs = np.empty(dataq.shape[0], dtype = object).reshape((dataq.shape[0], 1))
+        qs[:] = q_to_id[q]
+        labels_ = np.asarray(labels[q], dtype=int).reshape((dataq.shape[0], 1))
+        doc_ids = np.asarray(range(dataq.shape[0]), dtype = int).reshape((dataq.shape[0], 1))
+        towrite_test = np.vstack((towrite_test, np.hstack((labels_,qs,doc_ids,dataq))))
+    towrite_test = towrite_test[1:,:]
+
+    np.savetxt('train.txt', towrite_train, delimiter = ',')
+    np.savetxt('test.txt', towrite_test, delimiter = ',')
+
 if __name__ == '__main__':
     #ld.get_letor_3(64)
     #data_total_raw = ld.load_pickle('','data_cluster.pickle')
@@ -233,6 +259,11 @@ if __name__ == '__main__':
     queries = np.asanyarray(natsorted(data.keys()), dtype=object)
 
     training, testing = train_test_split(queries, test_size=0.33, random_state=42)
+
+    # create txt files for LambdaMART
+    #q_to_id = dict(zip(queries.tolist(),range(queries.shape[0])))
+    #create_txt_files(training, testing, data, labels, q_to_id)
+
     print 'Training set size: %i, Testing set size: %i' % (training.shape[0], testing.shape[0])
 
     print 'Estimating query features...'
