@@ -29,7 +29,7 @@ class UserVec:
 		# finally get vocabularySize
 		self.vocabularySize = sum(self.termFrequencies.values())
 
-		self.relativeTermFrequencies()
+		self.relativeTF()
 
 		print "user id: ", id
 		print len(self.termFrequencies), " terms"
