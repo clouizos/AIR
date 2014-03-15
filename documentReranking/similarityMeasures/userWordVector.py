@@ -29,7 +29,8 @@ class UserVec:
 		# finally get vocabularySize
 		self.vocabularySize = sum(self.termFrequencies.values())
 
-		self.relativeTF()
+		# relative term frequencies
+		self.relativeTermFrequencies = self.relativeTF()
 
 		print "user id: ", id
 		print len(self.termFrequencies), " terms"
@@ -62,7 +63,15 @@ class UserVec:
 
 	def relativeTF(self):
 		relativeTermFrequencies = dict()
+		
+		#compute relativeTermFrequencies
 		for term in self.termFrequencies:
 			relFreq = self.termFrequencies[term] / float(self.vocabularySize)
 			relativeTermFrequencies[term] = relFreq
-		self.relativeTermFrequencies = relativeTermFrequencies
+
+		# Then normalize
+		vecLength = float(sum(relativeTermFrequencies.values()))
+		for term in relativeTermFrequencies:
+			relativeTermFrequencies[term] = relativeTermFrequencies[term] / vecLength
+
+		return relativeTermFrequencies
