@@ -8,7 +8,7 @@ from collections import defaultdict
 from copy import deepcopy
 from multiprocessing import Pool
 from itertools import chain
-import time
+import time, csv
 
 class Ensemble:
     def __init__(self, rate):
