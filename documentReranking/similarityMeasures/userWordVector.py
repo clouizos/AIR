@@ -69,9 +69,4 @@ class UserVec:
 			relFreq = self.termFrequencies[term] / float(self.vocabularySize)
 			relativeTermFrequencies[term] = relFreq
 
-		# Then normalize
-		vecLength = float(sum(relativeTermFrequencies.values()))
-		for term in relativeTermFrequencies:
-			relativeTermFrequencies[term] = relativeTermFrequencies[term] / vecLength
-
 		return relativeTermFrequencies
