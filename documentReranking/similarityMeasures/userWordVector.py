@@ -63,6 +63,6 @@ class UserVec:
 	def relativeTF(self):
 		relativeTermFrequencies = dict()
 		for term in self.termFrequencies:
-			relFreq = self.termFrequnecies[term] / float(self.vocabularySize)
+			relFreq = self.termFrequencies[term] / float(self.vocabularySize)
 			relativeTermFrequencies[term] = relFreq
 		self.relativeTermFrequencies = relativeTermFrequencies
