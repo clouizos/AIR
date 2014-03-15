@@ -6,6 +6,7 @@ usersQueries = pickle.load(open('../../../userQueries_train', 'rb'))
 
 
 for userA in users:
+	print "Evaluating user ", userA
 	bestD = 0
 	bestUser = "bla"
 	a = vec.UserVec(userA)
@@ -19,6 +20,7 @@ for userA in users:
 			if term in termsA:
 				dist += relFreqA[term] * relFreqB[term]
 		if dist > 0:
+			print "Found best!", dist, userB
 			bestD = dist
 			bestUser = userB
 	print "Best match for user (", userA, ") is user (", bestUser, ")", bestD
