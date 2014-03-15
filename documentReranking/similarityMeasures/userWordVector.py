@@ -32,13 +32,6 @@ class UserVec:
 		# relative term frequencies
 		self.relativeTermFrequencies = self.relativeTF()
 
-		print "user id: ", id
-		print len(self.termFrequencies), " terms"
-		print len(self.clickedDocuments), " clicked documents"
-		print self.vocabularySize, " words"
-		print self.relativeTermFrequencies
-
-
 	def getClickedDocuments(self):
 		clicks = set()
 		userInfo = userQueriesAndClicks_strict[self.id]
