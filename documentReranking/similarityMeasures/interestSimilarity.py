@@ -14,7 +14,7 @@ for userA in users:
 	for userB in users:
 		b = vec.UserVec(userB)
 		relFreqB = b.relativeTermFrequencies
-		dist = 0:
+		dist = 0
 		for term in relFreqB.keys():
 			if term in termsA:
 				dist += relFreqA[term] * relFreqB[term]
