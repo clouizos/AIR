@@ -19,7 +19,7 @@ for userA in users:
 		for term in relFreqB.keys():
 			if term in termsA:
 				dist += relFreqA[term] * relFreqB[term]
-		if dist > 0:
+		if dist > bestD:
 			print "Found best!", dist, userB
 			bestD = dist
 			bestUser = userB
