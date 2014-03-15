@@ -35,7 +35,7 @@ class UserVec:
 		print len(self.termFrequencies), " terms"
 		print len(self.clickedDocuments), " clicked documents"
 		print self.vocabularySize, " words"
-		print relativeTermFrequencies
+		print self.relativeTermFrequencies
 
 
 	def getClickedDocuments(self):
