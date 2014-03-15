@@ -2,7 +2,7 @@ import userWordVector as vec
 import pickle
 
 users = pickle.load(open('../../../users', 'rb'))
-usersQueries = pickle.load(open('../../../usersQueries_train', 'rb'))
+usersQueries = pickle.load(open('../../../userQueries_train', 'rb'))
 
 
 for userA in users:
