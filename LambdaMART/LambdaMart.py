@@ -230,7 +230,7 @@ def evaluate(model, fn):
 
     scores = predict[:, 0]
     queries = predict[:, 1]
-    doc_id  = predict[:, 2]
+    doc_id = predict[:, 2]
     features = predict[:, 3:]
 
     results = model.eval(features)
@@ -238,7 +238,10 @@ def evaluate(model, fn):
     for line in zip(queries, results, doc_id):
             writer.writerow(line)
 
-    test_score = compute_ndcg(model.eval(features), scores)
+    test_score = np.zeros(4)
+    test_ = [1,3,5,10]
+    for k in xrange(len(test_)):
+        test_score[k] = ndcg(model.eval(features), scores.astype(int), queries.astype(int), test_[k])
 
     return test_score
 
@@ -254,4 +257,4 @@ if __name__ == "__main__":
 
     model = learn(options.train_file, n_trees=200)
     test_score = evaluate(model, options.predict_file)
-    print 'Final NDCG: %f' % test_score
+    print 'Final NDCG: ' + str(test_score)
