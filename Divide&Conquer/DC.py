@@ -43,7 +43,7 @@ def get_dic_per_cluster(clust_q, data_cluster, dataq, i, out_q = None):
         out_q.put(dict(i = dict_learn))
         print name, 'Exiting'
     else:
-        return dict(i = dict_learn)
+        return dict_learn   # dict(i = dict_learn)
 
 
 # parse the set of atoms for each cluster
@@ -67,7 +67,8 @@ def create_dics(each_cluster, dataq, train, total_features = 64, parallel = Fals
             processes.append(p)
             p.start()
         else:
-            result.update(get_dic_per_cluster(clust_q, data_cluster, dataq, i))
+            #result.update(get_dic_per_cluster(clust_q, data_cluster, dataq, i))
+            dics.append(get_dic_per_cluster(clust_q, data_cluster, dataq, i))
 
     if parallel:
         # wait for the processes
@@ -79,8 +80,8 @@ def create_dics(each_cluster, dataq, train, total_features = 64, parallel = Fals
             result.update(out_q.get())
 
     # add the dictionaries with the order we have for the clusters
-    for key in natsorted(result.keys()):
-        dics.append(result[key])
+    #for key in natsorted(result.keys()):
+    #    dics.append(result[key])
 
     return dics
 
@@ -98,7 +99,7 @@ def train(data_cluster, labels_cluster, dic, i, out_q = None):
         out_q.put(dict(i = ranksvm))
         print name, 'Exiting'
     else:
-        return dict(i = ranksvm)
+        return ranksvm   # dict(i = ranksvm)
 
 
 # train an ensemble of classifiers
@@ -130,7 +131,8 @@ def train_ensemble(each_cluster, dataq, labelq, train, dics, total_features = 64
             processes.append(p)
             p.start()
         else:
-            result.update(train(data_cluster, labels_cluster, dic_i, i))
+            #result.update(train(data_cluster, labels_cluster, dic_i, i))
+            ensemble.append(train(data_cluster, labels_cluster, dic_i, i))
 
     if parallel:
         # wait for the processes
@@ -142,8 +144,8 @@ def train_ensemble(each_cluster, dataq, labelq, train, dics, total_features = 64
             result.update(out_q.get())
 
     # add the dictionaries with the order we have for the clusters
-    for key in natsorted(result.keys()):
-        ensemble.append(result[key])
+    #for key in natsorted(result.keys()):
+    #    ensemble.append(result[key])
 
     return ensemble
 
@@ -274,10 +276,10 @@ if __name__ == '__main__':
     data_cluster_train_ds = sc.pdist(data_cluster_train, 'mahalanobis')
     data_cluster_train_ds = sc.squareform(data_cluster_train_ds)
 
-    plt.figure(1)
-    plt.imshow(data_cluster_train_ds)
-    plt.colorbar()
-    plt.title('Initial dissimilarity')
+    # plt.figure(1)
+    # plt.imshow(data_cluster_train_ds)
+    # plt.colorbar()
+    # plt.title('Initial dissimilarity')
 
     print 'Training a Dirichlet Process Gaussian Mixture model...'
     dpgmm = DPGMM(covariance_type='diag', alpha=2.0, n_iter=1000, n_components=10)
@@ -302,11 +304,11 @@ if __name__ == '__main__':
     # visuallize the clustering, it should be a block matrix
     data_vis = sc.pdist(data_cluster, 'mahalanobis')
     data_vis = sc.squareform(data_vis)
-    plt.figure(2)
-    plt.imshow(data_vis)
-    plt.colorbar()
-    plt.title('Clustered dissimilarity')
-    plt.show()
+    # plt.figure(2)
+    # plt.imshow(data_vis)
+    # plt.colorbar()
+    # plt.title('Clustered dissimilarity')
+    # plt.show()
 
     print 'Estimating dissimilarity of testing queries to the training ones...'
     test_dis = parse_test_dis(data_cluster_train, data_cluster_test)
