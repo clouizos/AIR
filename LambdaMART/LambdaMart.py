@@ -233,7 +233,7 @@ def evaluate(model, fn):
     features = predict[:, 3:]
 
     results = model.eval(features)
-    writer = csv.writer(open("result.csv"))
+    writer = csv.writer(open("result.csv", 'wb'))
     for line in zip(queries, results, doc_id):
             writer.writerow(line)
     return "OK"
