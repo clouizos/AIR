@@ -228,15 +228,22 @@ def learn(train_file, n_trees=10, learning_rate=0.1, k=10):
 def evaluate(model, fn):
     predict = np.loadtxt(fn, delimiter=",")
 
+    scores = predict[:, 0]
     queries = predict[:, 1]
-    doc_id  = predict[:, 2]
+    doc_id = predict[:, 2]
     features = predict[:, 3:]
 
     results = model.eval(features)
-    writer = csv.writer(open("result.csv"))
+    writer = csv.writer(open("result.csv", 'wb'))
     for line in zip(queries, results, doc_id):
             writer.writerow(line)
-    return "OK"
+
+    test_score = np.zeros(4)
+    test_ = [1,3,5,10]
+    for k in xrange(len(test_)):
+        test_score[k] = ndcg(model.eval(features), scores.astype(int), queries.astype(int), test_[k])
+
+    return test_score
 
 
 if __name__ == "__main__":
@@ -249,4 +256,5 @@ if __name__ == "__main__":
     learning_rate = 0.001
 
     model = learn(options.train_file, n_trees=200)
-    evaluate(model, options.predict_file)
+    test_score = evaluate(model, options.predict_file)
+    print 'Final NDCG: ' + str(test_score)
