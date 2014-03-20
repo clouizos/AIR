@@ -17,7 +17,7 @@ allUsers = pickle.load(open('../../users', 'rb'))['users']
 
 # THIS IS VERY INEFFICIENT, it will create new user objects for all the Similar users and that's not good.
 def getRankingScoreForDocument(similarUsers, document):
-	rank = 0
+	rank = 1
 	# for all users, find the similarity score, add this to 
 	# the total ranking score if the user actually clicked the documents
 	# if no one clicked the document, set the score to -9999
@@ -26,7 +26,7 @@ def getRankingScoreForDocument(similarUsers, document):
 		similarity = uB[1]
 		if userB.didClickDocument(document):
 			raw = exp(similarity)
-			rank += sqrt(raw)
+			rank *= raw
 	if rank == 0:
 		rank = -9990
 	return rank 
