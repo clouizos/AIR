@@ -27,7 +27,7 @@ def getRankingScoreForDocument(similarUsers, document):
 			rank += similarity * similarity
 	if rank == 0:
 		rank = -9990
-	return rank
+	return rank 
 
 def createReRankingDump():
 	resultingRanks = dict()
