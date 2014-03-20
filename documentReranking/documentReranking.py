@@ -4,6 +4,7 @@
 import user as user
 import pickle
 import sys
+from math import sqrt
 
 outputFile = sys.argv[1]
 model = sys.argv[2]
@@ -24,7 +25,7 @@ def getRankingScoreForDocument(similarUsers, document):
 		userB = uB[0]
 		similarity = uB[1]
 		if userB.didClickDocument(document):
-			rank += similarity 
+			rank += sqrt(similarity)
 	if rank == 0:
 		rank = -9990
 	return rank 
