@@ -25,8 +25,8 @@ def getRankingScoreForDocument(similarUsers, document):
 		userB = uB[0]
 		similarity = uB[1]
 		if userB.didClickDocument(document):
-			raw =  exp(similarity)
-			rank += -sqrt(-similarity)
+			raw = exp(similarity)
+			rank += raw
 	if rank == 0:
 		rank = -9990
 	return rank 
