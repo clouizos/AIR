@@ -1,5 +1,5 @@
 # user class contains basic information (i.e information I need) about the user
-
+# try to improve it
 import numpy as np
 import pickle
 
