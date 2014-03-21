@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.11 (TeX Live 2010) (format=pdflatex 2010.12.3)  21 MAR 2014 09:30
+This is pdfTeX, Version 3.1415926-1.40.11 (TeX Live 2010) (format=pdflatex 2010.12.3)  21 MAR 2014 09:31
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -143,7 +143,7 @@ Package ifvtex Info: VTeX not detected.
 \Gm@layoutvoffset=\dimen121
 \Gm@dimlist=\toks26
 )
-No file Anouk.aux.
+(./Anouk.aux)
 \openout1 = `Anouk.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 11.
@@ -159,7 +159,7 @@ LaTeX Font Info:    ... okay on input line 11.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 11.
 LaTeX Font Info:    ... okay on input line 11.
 LaTeX Font Info:    Try loading font information for U+msa on input line 11.
-(/usr/local/texlive/2010/texmf-dist/tex/latex/amsfonts/umsa.fd
+ (/usr/local/texlive/2010/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
 LaTeX Font Info:    Try loading font information for U+msb on input line 11.
@@ -208,20 +208,21 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 1853 strings out of 493747
- 22443 string characters out of 3143546
- 78571 words of memory out of 3000000
- 5022 multiletter control sequences out of 15000+200000
- 6237 words of font info for 25 fonts, out of 3000000 for 9000
+ 1857 strings out of 493747
+ 22484 string characters out of 3143546
+ 78578 words of memory out of 3000000
+ 5023 multiletter control sequences out of 15000+200000
+ 6544 words of font info for 26 fonts, out of 3000000 for 9000
  875 hyphenation exceptions out of 8191
- 34i,4n,31p,324b,186s stack positions out of 5000i,500n,10000p,200000b,50000s
-</usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pf
-b></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb>
-</usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
-Output written on Anouk.pdf (1 page, 26651 bytes).
+ 34i,4n,31p,324b,188s stack positions out of 5000i,500n,10000p,200000b,50000s
+</usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
+></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb
+></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><
+/usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
+Output written on Anouk.pdf (1 page, 36532 bytes).
 PDF statistics:
- 20 PDF objects out of 1000 (max. 8388607)
- 13 compressed objects within 1 object stream
+ 24 PDF objects out of 1000 (max. 8388607)
+ 16 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
