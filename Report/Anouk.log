@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.11 (TeX Live 2010) (format=pdflatex 2010.12.3)  21 MAR 2014 09:31
+This is pdfTeX, Version 3.1415926-1.40.11 (TeX Live 2010) (format=pdflatex 2010.12.3)  21 MAR 2014 10:07
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -202,27 +202,30 @@ File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 [1{/usr/local/texlive/2010/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-(./Anouk.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+(./Anouk.aux) ) 
 Here is how much of TeX's memory you used:
- 1857 strings out of 493747
- 22484 string characters out of 3143546
- 78578 words of memory out of 3000000
- 5023 multiletter control sequences out of 15000+200000
- 6544 words of font info for 26 fonts, out of 3000000 for 9000
+ 1888 strings out of 493747
+ 22805 string characters out of 3143546
+ 81581 words of memory out of 3000000
+ 5043 multiletter control sequences out of 15000+200000
+ 11939 words of font info for 46 fonts, out of 3000000 for 9000
  875 hyphenation exceptions out of 8191
- 34i,4n,31p,324b,188s stack positions out of 5000i,500n,10000p,200000b,50000s
-</usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
-></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb
-></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><
-/usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
-Output written on Anouk.pdf (1 page, 36532 bytes).
+ 34i,4n,31p,530b,188s stack positions out of 5000i,500n,10000p,200000b,50000s
+</usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmbx12.pfb></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmcsc10.pfb></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmex10.pfb></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmmi12.pfb></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmmi6.pfb></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+mi8.pfb></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmr1
+2.pfb></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.p
+fb></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pf
+b></usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+</usr/local/texlive/2010/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb>
+Output written on Anouk.pdf (1 page, 106284 bytes).
 PDF statistics:
- 24 PDF objects out of 1000 (max. 8388607)
- 16 compressed objects within 1 object stream
+ 52 PDF objects out of 1000 (max. 8388607)
+ 37 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -11,7 +11,22 @@
 \begin{document}
 
 \section{Collaborative Document Re-Ranking}
-\subsection{Explanation}
+\subsection{Approach}
+%What is document re-ranking? (re-ranking formula)
+When we use collaborative document re-ranking, we will re-rank the documents returned by a search engine based on comparing the user to a number of most similar users and upgrade the ranking score of a document proportional to the user similarity with other users that clicked the documents. As the search engine we are using does not provide any ranking whatsoever, we will assign a ranking sore based on user similarity only. The ranking score for a document $d$ for a given user $u_a$ is defined as: 
+$$r(d, u_a) = \sum\limits_{u_b \in U}\textit{sim}(u_a, u_b)\delta(u_b, d)$$
+where $U$ denotes the set of $k$ most similar users, $\textit{sim}(u_a, u_b)$ is the function that computes the user similarity and $\delta(u_b, d) = 1$ if user $u_b$ clicked document $d$ and zero otherwise. A lot of different methods can be used to compute $\textit{sim}(u_a, u_b)$, we have chosen a language modeling approach in which we define $\textit{sim}(u_a, u_b)$ as:
+$$ \textit{sim}(u_a, u_b) = \frac{1}{|Q_{u_a}|}\sum\limits_{q \in Q_{u_a}} p(q|u_b)$$
+where $Q_{u_a}$ is the set of queries from user $u_a$ and $p(q|u)$ can be computed as:
+$$p(q|u) = \prod\limits_{q_i \in q} \frac{\textit{tf}_{q_i, u}+1}{\sum\limits_{x \in V_u} \textit{tf}_{x, u}}$$
+where $V_u$ denotes the vocabulary of user $u$. We can define the vocabulary in different ways. We have evaluated two methods of collaborative document re-ranking, the first one uses the Simple User Language Model (SULM) where the user's vocabulary consists only of its queries. In addition to this, we have also defined the vocabulary as the users's queries complemented by all words from the documents the user has clicked. We call this the Extended User Language Model (EULM).
+%So, how to get the set of most similar users? 
+%Language model, user sim measure 
+%Notice log space
 \subsection{Results}
+We compare our approach against a random ranking (RANDOM) and greatest hits ranking where documents are ranked according to the number of clicks they got (POP).
+%Report MAP, P@1, P@3 and MRR
+\subsection{Discussion}
+%Query also plays a role. 
 
 \end{document}

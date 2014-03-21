@@ -7,6 +7,8 @@ termFrequencies = pickle.load(open('../../termFrequencies_train', 'rb'))
 userQueries = pickle.load(open('../../userQueries_train', 'rb'))
 
 class UserLM:
+	# vocabularySize is a bit misleading, it is not the number of unique terms
+	# but the number of terms a user has used
 	vocabularySize = 0
 	queries = []
 	termFrequencies = []
