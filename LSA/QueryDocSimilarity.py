@@ -4,12 +4,14 @@ from nltk.stem.snowball import SnowballStemmer
 
 stemmer = SnowballStemmer("dutch")
 
-# documents collection
+# documents collection - only sample data at the moment
 documents = ['How to Bake Bread Without Recipes', 'The Classic Art of Viennese Pastry', 'Numerical Recipes: The Art of Scientific Computing',
                             'Breads, Pastries, Pies and Cakes : Quantity Baking Recipes', 'Pastry: A Book of Best French Recipe']
 
-# query terms
-terms = ['bak','recipe','bread', 'cake','pastr','pie'] #list of stemmed tokens with frequent terms inside documents
+# each unique term in the vocabulary will represent one row entry for the term-document matrix
+terms = ['bak', 'recipe', 'bread', 'cake', 'pastr', 'pie', 'how']
+
+#query
 query = "Baking bread"
 
 def stem(x):
@@ -65,6 +67,6 @@ class LatentSemanticIndexing:
         return LSIscores
 
 LSI = LatentSemanticIndexing(terms, documents, query)
-print LSI.LSIScores(query, documents)
+#print LSI.LSIScores(query, documents)
 
-#pickle.dump(LSI.LSIScores(query, documents), open("LSIRanking.p", "wb"))
+pickle.dump(LSI.LSIScores(query, documents), open("LSIRanking.p", "wb"))
