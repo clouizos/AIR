@@ -9,6 +9,7 @@ def sim(A, B, queriesA, minCommonTerms):
 	# if not, return 0
 	if A.termsInCommon(B) > minCommonTerms:
 		# calculate the similarity
+		print len(queriesA):
 		for query in queriesA:
 			similarityScore += B.p_q_u(query)
 		similarityScore = similarityScore / A.numberOfQueries
