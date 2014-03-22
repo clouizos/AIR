@@ -165,6 +165,7 @@ def test():
 	overallPrecisionAt5 = overallPrecisionAt5 / float(len(userQueriesAndClicks_strict.keys()))
 	overallPrecisionAt5Random = overallPrecisionAt5Random / float(len(userQueriesAndClicks_strict.keys()))
 
+	print "======================== Overall Results =========================="
 	print "Overall map = ", overallMap, " (random = ", overallMAPRandom, ")"
 	print "Overall mrr = ", overallMRR, " (random = ", overallMRRRandom, ")"
 	print "Overall P@1 = ", overallPrecisionAt1, " (random = ", overallPrecisionAt1Random, ")"
