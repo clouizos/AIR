@@ -194,7 +194,7 @@ def mrrLocal(relevanceJudgements):
 	mrr = 0
 	for i in xrange(len(relevanceJudgements)):
 		if relevanceJudgements[i] == 1:
-			mrr = 1/float(i)
+			mrr = 1/float(i+1)
 			break
 	return mrr
 test()
