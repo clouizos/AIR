@@ -55,11 +55,15 @@ class Result:
 def test():
 	overallMAPRandom = 0
 	overallMap = 0
+	overallMRRRandom = 0
+	overallMRR = 0
 	for user in userQueriesAndClicks_strict.keys():
 		userInfo = userQueriesAndClicks_strict[user]
 		res = Result(user)
 		mapRandom = 0
 		map = 0
+		mrrRandom = 0
+		mrr = 0
 		for infoTriplet in userInfo:
 			
 			# get a random ranking for the query 
@@ -72,16 +76,29 @@ def test():
 
 			mapRandom += averagePrecision(relevanceJudgementsRANDOM)
 			map += averagePrecision(relevanceJudgements)
+
+			mrrRandom += mrr(relevanceJudgementsRANDOM)
+			mrr += mrr(relevanceJudgements)
 	
 		mapRandom = mapRandom / float(len(userInfo))
 		map = map / float(len(userInfo))
+		mrrRandom = mrrRandom / float(len(userInfo))
+		mrr = mrr / float(len(userInfo))
 		overallMAPRandom += mapRandom
 		overallMap += map
+		overallMRRRandom += mrrRandom
+		overallMRR += mrr
+
 	
-		#print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
+		print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
 	overallMAPRandom = overallMAPRandom / float(len(userQueriesAndClicks_strict.keys()))
 	overallMap = overallMap / float(len(userQueriesAndClicks_strict.keys()))
+	overallMRRRandom = overallMRRRandom / float(len(userQueriesAndClicks_strict.keys()))
+	overallMRR = overallMRR / float(len(userQueriesAndClicks_strict.keys()))
+
 	print "Overall map = ", overallMap, " (random = ", overallMAPRandom, ")"
+	print "Overall mrr = ", overallMRR, " (random = ", overallMRRRandom, ")"
+
 
 # Calculates precision at rank len(relevanceJudgements) (so the caller should provide the right k already)
 # input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
@@ -98,4 +115,11 @@ def averagePrecision(relevanceJudgements):
 	ap = ap / float(sum(relevanceJudgements))
 	return ap
 
+def mrr():
+	mrr = 0
+	for i in xrange(len(relevanceJudgements)):
+		if relevanceJudgements[i] == 1:
+			mrr = i
+			break
+	return mrr
 test()
