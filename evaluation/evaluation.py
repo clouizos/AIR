@@ -154,12 +154,12 @@ def test():
 		overallPrecisionAt5 += precisionAt5
 		overallPrecisionAt5Random += precisionAt5Random
 
-		print
-		print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
-		print "MRR: ", mrr, " Random: ", mrrRandom, " Difference: ", mrr - mrrRandom
-		print "P@1: ", precisionAt1, " Random: ", precisionAt1Random, " Difference: ", precisionAt1 - precisionAt1Random
-		print "P@5: ", precisionAt5, " Random: ", precisionAt5Random, " Difference: ", precisionAt5 - precisionAt5Random
-		print
+		# print
+		# print "MAP: ", map, " Random: ", mapRandom, " Difference: ", map - mapRandom
+		# print "MRR: ", mrr, " Random: ", mrrRandom, " Difference: ", mrr - mrrRandom
+		# print "P@1: ", precisionAt1, " Random: ", precisionAt1Random, " Difference: ", precisionAt1 - precisionAt1Random
+		# print "P@5: ", precisionAt5, " Random: ", precisionAt5Random, " Difference: ", precisionAt5 - precisionAt5Random
+		# print
 
 	
 	overallMAPRandom = overallMAPRandom / float(len(userQueriesAndClicks_strict.keys()))
@@ -179,7 +179,7 @@ def test():
 	print "Overall mrr = ", overallMRR, " (random = ", overallMRRRandom, ")"
 	print "Overall P@1 = ", overallPrecisionAt1, " (random = ", overallPrecisionAt1Random, ")"
 	print "Overall P@5 = ", overallPrecisionAt5, " (random = ", overallPrecisionAt5Random, ")"
-	print [maps, mrrs, pat1, pat5]
+	#print [maps, mrrs, pat1, pat5]
 
 # Calculates precision at rank len(relevanceJudgements) (so the caller should provide the right k already)
 # input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
