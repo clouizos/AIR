@@ -100,8 +100,8 @@ def test():
 			mapRandom += averagePrecision(relevanceJudgementsRANDOM)
 			map += averagePrecision(relevanceJudgements)
 
-			mrrRandom += mrr(relevanceJudgementsRANDOM)
-			mrr += mrr(relevanceJudgements)
+			mrrRandom += mrrLocal(relevanceJudgementsRANDOM)
+			mrr += mrrLocal(relevanceJudgements)
 
 			if len(relevanceJudgements) >= 1:
 				precisionAt1 += precisionAt(relevanceJudgements[:1])
@@ -188,7 +188,7 @@ def averagePrecision(relevanceJudgements):
 	ap = ap / float(sum(relevanceJudgements))
 	return ap
 
-def mrr():
+def mrrLocal(relevanceJudgements):
 	mrr = 0
 	for i in xrange(len(relevanceJudgements)):
 		if relevanceJudgements[i] == 1:
