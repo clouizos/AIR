@@ -1,4 +1,4 @@
-from __future__ import division 
+from __future__ import division
 from scipy.stats import norm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,7 +21,8 @@ class random_normal:
         self.size = T
 
     def random(self):
-        return np.random.normal(self.mean, self.variance, size = self.size)
+        return np.random.normal(self.mean, self.variance, size=self.size)
+
 
 class random_gamma:
     alpha = 0
@@ -34,7 +35,8 @@ class random_gamma:
         self.size = T
 
     def random(self):
-        return np.random.gamma(self.alpha, self.beta, size = self.size)
+        return np.random.gamma(self.alpha, self.beta, size=self.size)
+
 
 # get the categorial results (each experiment directly and not the resulting sum)
 def generate_indices(x, k):
@@ -46,6 +48,7 @@ def generate_indices(x, k):
     # mix up the order, in-place, if you care about them not being sorted
     np.random.shuffle(b)
     return b
+
 
 # p is the probabilities from the stick-breaking construction
 # k is the number of samples (experiments)
@@ -59,6 +62,7 @@ def DP(k, p, theta):
     indices = generate_indices(x, k)
     return theta[indices, :]
 
+
 def stick(alpha, k):
     # beta distribution for constructing the stick
     betas = np.random.beta(1.0, alpha, k)
@@ -68,20 +72,22 @@ def stick(alpha, k):
     # on the auxiliary gamma_e variable later
     return p
 
+
 def proof_check(theta, dp, fig_n):
     bins = np.zeros(np.shape(theta)[0])
     for i in range(np.shape(theta)[0]):
-        row = theta[i,:]
-        indices = [j for j in range(np.shape(dp)[0]) if np.array_equal(dp[j, :], row) ]
+        row = theta[i, :]
+        indices = [j for j in range(np.shape(dp)[0]) if np.array_equal(dp[j, :], row)]
         bins[i] = len(indices)
 
     # create a histogram of the draws of the parameters
     plt.figure(fig_n)
-    plt.bar(np.arange(len(bins)), bins, width = 0.01)
+    plt.bar(np.arange(len(bins)), bins, width=0.01)
     plt.show()
 
+
 # eq.2 of the paper
-def joint_q_d(theta_c, query, click_list, docs, T):
+def joint_q_d(theta_c, query, click_list, docs, T, q_doc_features, str_query):
     # get the parameters for the group
     mu_c = theta_c[0:T]
     sigma_c = theta_c[T:2*T]
@@ -101,7 +107,8 @@ def joint_q_d(theta_c, query, click_list, docs, T):
     for elem in comb:
         # probably we need log probability in order to avoid underflows
         #pair_prefs.append(pair_pref(beta_c, docs[click_list[elem[0]][0]], docs[click_list[elem[1]][0]]))
-        pair_prefs.append(np.log(pair_pref(beta_c, docs[click_list[elem[0]][0]], docs[click_list[elem[1]][0]])))
+        pair_prefs.append(np.log(pair_pref(beta_c, q_doc_features[str_query+':'+click_list[elem[0]][0]],
+                                                   q_doc_features[str_query+':'+click_list[elem[1]][0]])))
 
     if len(pair_prefs) >= 1:
         rank_prob = np.sum(pair_prefs)
@@ -130,9 +137,11 @@ def joint_q_d(theta_c, query, click_list, docs, T):
 
     #return p_q * rank_prob
 
+
 # eq.1 of the paper
 def pair_pref(beta_c, doc_i, doc_j):
-    return 1/(1 + np.exp(- np.dot(beta_c.T, doc_i - doc_j )))
+    return 1/(1 + np.exp(- np.dot(beta_c.T, doc_i - doc_j)))
+
 
 # gradient of eq.1 of the paper (needed for HMC)
 def grad_pair_pref(beta_c, doc_i, doc_j):
@@ -147,7 +156,7 @@ def grad_pair_pref(beta_c, doc_i, doc_j):
 # queries are the queries of a given group k
 # beta_k, mu_k, sigma_k are the parameters of the group k
 # users are the users of having queries in group k
-def eval_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click_list, docs, prior_params):
+def eval_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click_list, docs, prior_params, q_doc_features):
     alpha0 = prior_params[0]
     mu0 = prior_params[1]
     sigma0 = prior_params[2]
@@ -170,11 +179,11 @@ def eval_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click
         for user in users:
             # if user has that query
             if query in user_q[user]:
-                sec_term += joint_q_d(theta_k, queries[query], click_list[user+':'+query], docs, T)
+                sec_term += joint_q_d(theta_k, queries[query], click_list[user+':'+query], docs, T, q_doc_features, query)
 
     return first_term + sec_term
 
-def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click_list, docs, prior_params):
+def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click_list, docs, prior_params, q_doc_features):
     #T = prior_params[3]
     #beta_k = theta_k[2*T:]
     grad = np.zeros(beta_k.shape[0])
@@ -202,17 +211,19 @@ def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, 
                     # args = [docs[user_specific_click_list[elem[0]][0]], docs[user_specific_click_list[elem[1]][0]]]
                     # print 'check: ' + str(check_grad(pair_pref, grad_pair_pref, beta_k, *args))
 
-                    pair_prefs.append(grad_pair_pref(beta_k, docs[user_specific_click_list[elem[0]][0]], docs[user_specific_click_list[elem[1]][0]]))
+                    pair_prefs.append(grad_pair_pref(beta_k,
+                        q_doc_features[query+':'+user_specific_click_list[elem[0]][0]],
+                        q_doc_features[query+':'+user_specific_click_list[elem[1]][0]]))
 
                 # if there was such a combination
                 if len(pair_prefs) >= 1:
-                    grad += np.sum(pair_prefs, axis = 0)
+                    grad += np.sum(pair_prefs, axis=0)
             #except:
             #    pass
 
     return grad
 
-def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, docs, prior_params):
+def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, docs, prior_params, q_doc_features):
     # define stepsize of MCMC.
     stepsize = 0.000047
     accepted = 0.0
@@ -220,8 +231,8 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
     chain = [theta_k]
     T = prior_params[3]
     V = prior_params[4]
-    beta_k = theta_k[2*T:]
-    args = [theta_k, queries, component, users, user_q, user_clicks, docs, prior_params]
+    #beta_k = theta_k[2*T:]
+    #args = [theta_k, queries, component, users, user_q, user_clicks, docs, prior_params, q_doc_features]
 
     # TODO : check the gradients again, the check_grad measurements seem to be off
     # print 'grad correction: ' + str(check_grad(eval_loglike_theta,
@@ -229,14 +240,14 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
     #                                       beta_k, *args))
 
     for i in range(iterations):
-        print 'iteration %i' %i
+        print 'iteration HMC %i' % i
         old_theta_k = chain[len(chain) - 1]
         old_energy = -eval_loglike_theta(old_theta_k[2*T:], old_theta_k, queries,
-                        component, users, user_q, user_clicks, docs, prior_params)
+                        component, users, user_q, user_clicks, docs, prior_params, q_doc_features)
         #print 'old_energy: ' + str(old_energy)
         old_grad = -eval_grad_loglike_theta(old_theta_k[2*T:], old_theta_k, queries,
                                             component, users, user_q, user_clicks,
-                                            docs, prior_params)
+                                            docs, prior_params, q_doc_features)
         #print 'old grad: ' + str(old_grad)
 
         new_theta_k = np.copy(old_theta_k)  # deep copy of array
@@ -245,12 +256,12 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
         # Suggest new candidate using gradient + Hamiltonian dynamics.
         # draw random momentum vector from unit Gaussian.
         p = np.random.normal(0, 1, V)
-        H = np.dot(p,p)/2.0 + old_energy    # compute Hamiltonian
+        H = np.dot(p, p)/2.0 + old_energy    # compute Hamiltonian
 
         new_beta_k = new_theta_k[2*T:]
         # Do 5 Leapfrog steps.
         for tau in range(5):
-            print 'leap %i' %tau
+            # print 'leap %i' % tau
             # make half step in p
             p = p - stepsize*new_grad/2.0
             # make full step in alpha,
@@ -259,17 +270,19 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
             new_beta_k = new_beta_k + stepsize*p
             new_theta_k[2*T:] = new_beta_k
             # compute new gradient
-            new_grad = -eval_grad_loglike_theta(new_beta_k, new_theta_k, queries, component,
-                                                users, user_q, user_clicks, docs, prior_params)
+            new_grad = -eval_grad_loglike_theta(new_beta_k, new_theta_k, queries,
+                                                component, users, user_q, user_clicks,
+                                                docs, prior_params, q_doc_features)
 
             # make half step in p
             p = p - stepsize*new_grad/2.0
 
         # Compute new Hamiltonian. Remember, energy = -loglik.
         new_energy = -eval_loglike_theta(new_theta_k[2*T:], new_theta_k, queries,
-                        component, users, user_q, user_clicks, docs, prior_params)
+                                         component, users, user_q, user_clicks,
+                                         docs, prior_params, q_doc_features)
         #print 'new energy: ' + str(new_energy)
-        newH = np.dot(p,p)/2.0 + new_energy
+        newH = np.dot(p, p)/2.0 + new_energy
         dH = newH - H
 
         # Accept new candidate in Monte-Carlo fashion.
@@ -277,7 +290,7 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
             chain.append(new_theta_k)
             accepted = accepted + 1.0
         else:
-            u = random.uniform(0.0,1.0)
+            u = random.uniform(0.0, 1.0)
             if (u < math.exp(-dH)):
                 chain.append(new_theta_k)
                 accepted = accepted + 1.0
@@ -286,17 +299,20 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
 
     return chain
 
+
 # caching, for faster computation
 def memoize(func):
     S = {}
+
     def wrappingfunction(*args):
         if args not in S:
             S[args] = func(*args)
         return S[args]
     return wrappingfunction
 
+
 @memoize
-def stirling1(n,k):
+def stirling1(n, k):
     """Returns the stirling number of the first kind using recursion.."""
     if n == 0 and k == 0:
         return 1
@@ -305,4 +321,3 @@ def stirling1(n,k):
     if k > n:
         return 0
     return stirling1(n-1, k-1) + (n - 1) * stirling1(n-1, k)
-
