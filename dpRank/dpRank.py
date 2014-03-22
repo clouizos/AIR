@@ -43,7 +43,7 @@ class User:
                     self.assign[i] += -1
 
 
-def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamma_e, docs, K, prior_params):
+def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamma_e, docs, K, prior_params, q_doc_features):
     print 'Sampling assignments...'
     T = prior_params[3]
     # for each user
@@ -60,14 +60,13 @@ def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamm
                         if user.assign[j] == k:
                             mu_uk_minus_current += 1
                 assign_group[k] = np.log((eta*gamma_k[k] + mu_uk_minus_current))
-                assign_group[k] += u.joint_q_d(theta_c[k,:],
-                                           queries[user.queries[i]],
-                                           user.click_list[user.queries[i]],
-                                           docs, T)
+                assign_group[k] += u.joint_q_d(theta_c[k,:], queries[user.queries[i]],
+                                               user.click_list[user.queries[i]],
+                                               docs, T, q_doc_features, user.queries[i])
             aux_assign = np.log(eta*gamma_e)
             aux_assign += u.joint_q_d(theta_e, queries[user.queries[i]],
                                       user.click_list[user.queries[i]],
-                                      docs, T)
+                                      docs, T, q_doc_features, user.queries[i])
             # get all the probabilities
             sample_prob = np.hstack((assign_group, aux_assign))
             # normalize
@@ -125,7 +124,7 @@ def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamm
     return users_objects, gamma_k, gamma_e, theta_c, theta_e
 
 
-def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
+def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q=None):
     print 'Sampling gammas...'
     #name = mpc.current_process().name
     #print name, 'Starting'
@@ -133,7 +132,7 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
     # get the active components
     K = gamma_k.shape[0]
     # init the random variable h
-    m_uik = np.zeros((len(user_q), K), dtype = int)
+    m_uik = np.zeros((len(user_q), K), dtype=int)
 
     # find the m_uik for every user
     users_ = natsorted(users_objects)
@@ -141,7 +140,6 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
     for user_check in users_:
         m_uik[cnt,:] = np.bincount(users_objects[user_check].assign, minlength=K)
         cnt += 1
-
 
     # it seems that we need to sample h first
     # and based on that we sample gamma
@@ -151,8 +149,8 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
             # do not keep the first value (0) since
             # the stirling1 will produce 0 so it doesn't
             # affect the probabilities
-            h_candidates = np.asfarray([u.stirling1(m_uik[i,j], h) *
-                            (eta * gamma_k[j])** h for h in range(m_uik[i,j])[1:]])
+            h_candidates = np.asfarray([u.stirling1(m_uik[i, j], h) *
+                                (eta * gamma_k[j])** h for h in range(m_uik[i, j])[1:]])
             # normalize and pick the maximum
             # again maybe we need to pick a random one according to those probabilities?
 
@@ -168,7 +166,7 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
     dir_params = np.zeros(K + 1)
     for k in range(K + 1):
         if k < K:
-            dir_params[k] = np.sum(h_uik[:,k])
+            dir_params[k] = np.sum(h_uik[:, k])
         else:
             dir_params[k] = alpha
 
@@ -182,13 +180,13 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q = None):
     if out_q is not None:
         key = ['gamma_k', 'gamma_e']
         value = [gamma_k, gamma_e]
-        out_q.put(dict(zip(key,value)))
+        out_q.put(dict(zip(key, value)))
         #print name, 'Exiting'
     else:
         return gamma_k, gamma_e
 
 
-def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, out_q = None):
+def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, out_q = None):
     print 'Sampling thetas...'
     #name = mpc.current_process().name
     #print name, 'Starting'
@@ -264,18 +262,18 @@ def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, pri
             if len(set(user_q[user]).intersection(queries_check)) >= 1:
                 users.append(user)
 
-        chain = u.HMC(iter_HMC, theta_c[k,:], queries, queries_of_k, users, user_q, user_clicks, docs, prior_params)
+        chain = u.HMC(iter_HMC, theta_c[k,:], queries, queries_of_k, users, user_q, user_clicks, docs, prior_params, q_doc_features)
         # Discard first 20% of MCMC chain
         clean = []
-        for n in range(int(0.2 * iter_HMC),len(chain)):
+        for n in range(int(0.2 * iter_HMC), len(chain)):
             # thin the samples
             if (n % 2 == 0):
                 clean.append(chain[n])
 
-        theta_c[k,:] = np.mean(clean, axis = 0)
+        theta_c[k, :] = np.mean(clean, axis=0)
 
     if out_q is not None:
-        out_q.put(dict(theta_c = theta_c))
+        out_q.put(dict(theta_c=theta_c))
         #print name, 'Exiting'
     else:
         return theta_c
@@ -316,7 +314,7 @@ if __name__ == '__main__':
     active_components = [[] for i in range(K)]
 
     # get some dummy data
-    docs, queries, user_q, q_doc, user_clicks = gen_dummy(nr_docs, nr_queries, N, groups)
+    docs, queries, user_q, q_doc, user_clicks, q_doc_features = gen_dummy(nr_docs, nr_queries, N, groups)
 
     # gibbs sampler params
     gibbs_iter = 5
@@ -340,10 +338,10 @@ if __name__ == '__main__':
     # params according to the draws from the truncated DP
     # essentially each group has its own means, variances and betas
     # initial parameters
-    theta_c = np.zeros((K,2*T + V))
+    theta_c = np.zeros((K, 2*T + V))
     # active thetas
     for i in range(K):
-        theta_c[i,0:T] = mu_kt.random()
+        theta_c[i, 0:T] = mu_kt.random()
         theta_c[i, T: 2*T] = tau_kt.random()
         theta_c[i, 2*T:] = beta_ku.random()
 
@@ -365,7 +363,6 @@ if __name__ == '__main__':
     for user in natsorted(user_q):
         users_objects[user] = User(user, user_q[user], user_clicks, K)
 
-
     tot_chain = []
     #out_q = mpc.Queue()
     #resultdict = {}
@@ -379,9 +376,7 @@ if __name__ == '__main__':
                                                                 eta, theta_c,
                                                                 theta_e, gamma_k,
                                                                 gamma_e, docs, K,
-                                                                prior_params)
-
-
+                                                                prior_params, q_doc_features)
 
         params['users_objects'] = deepcopy(users_objects)
         params['theta_e'] = np.copy(theta_e)
@@ -392,7 +387,7 @@ if __name__ == '__main__':
 
         # experimental
         # args_g = (users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q)
-        # args_t = (users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, out_q)
+        # args_t = (users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, out_q)
 
         # # define the parallel processes
         # d = mpc.Process(name='gamma_sampling', target=sample_g, args=args_g)
@@ -415,9 +410,8 @@ if __name__ == '__main__':
         # theta_c = resultdict['theta_c']
         # resultdict.clear()
 
-
         gamma_k, gamma_e = sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q)
-        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC)
+        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features)
 
         params['gamma_k'] = np.copy(gamma_k)
         params['gamma_e'] = np.copy(gamma_e)
@@ -427,7 +421,7 @@ if __name__ == '__main__':
             print users_objects[user].assign
         print gamma_k, gamma_e
         print theta_c.shape
-        print theta_c[:,T:2*T]
+        print theta_c[:, T:2*T]
 
         tot_chain.append(params.copy())
 
@@ -442,7 +436,7 @@ if __name__ == '__main__':
 
     # Discard first 20% of MCMC chain (burnin)
     clean = []
-    for n in range(burnin,len(tot_chain)):
+    for n in range(burnin, len(tot_chain)):
         # thin the samples
         if (n % thinning == 0):
             clean.append(tot_chain[n])
@@ -456,5 +450,3 @@ if __name__ == '__main__':
 
     with open('clean_total.pickle', 'wb') as handle:
         pickle.dump(clean, handle)
-
-
