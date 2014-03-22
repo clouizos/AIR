@@ -173,13 +173,10 @@ def test():
 	print "Overall P@1 = ", overallPrecisionAt1, " (random = ", overallPrecisionAt1Random, ")"
 	print "Overall P@5 = ", overallPrecisionAt5, " (random = ", overallPrecisionAt5Random, ")"
 
-
-
 # Calculates precision at rank len(relevanceJudgements) (so the caller should provide the right k already)
 # input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
 def precisionAt(relevanceJudgements):
-	print sum(relevanceJudgements) / len(relevanceJudgements)
-	return sum(relevanceJudgements) / len(relevanceJudgements)
+	return sum(relevanceJudgements) / float(len(relevanceJudgements))
 
 # Calculates average precision of a ranked list
 # input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
