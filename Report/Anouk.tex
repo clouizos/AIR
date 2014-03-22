@@ -10,6 +10,11 @@
 %%% BEGIN DOCUMENT
 \begin{document}
 
+\section{Description of the data}
+For our research we used document contents and search engine logs that were generously made available to us by the dutch institute for video and sound [1]. The institute maintains a large database with video fragments with textual description. These video fragments are searched by expert users of the search engine and used in television broadcastings. Users of this service are typically journalists and they pay for this service.
+
+The textual description of the video fragments are the documents that are being searched to retrieve video fragments. They are on average $130$ words long, written in Dutch. The documents have three fields, Title, Description and Summary, which are all optional. Documents also have a genre, which can be one of twelve. 
+
 \section{Collaborative Document Re-Ranking}
 \subsection{Approach}
 %What is document re-ranking? (re-ranking formula)
@@ -28,5 +33,8 @@ We compare our approach against a random ranking (RANDOM) and greatest hits rank
 %Report MAP, P@1, P@3 and MRR
 \subsection{Discussion}
 %Query also plays a role. 
+
+\subsection{References}
+[1] http://www.beeldengeluid.nl/over-beeld-en-geluid
 
 \end{document}
