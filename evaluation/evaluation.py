@@ -67,6 +67,11 @@ def test():
 	overallPrecisionAt5Random = 0
 	overallPrecisionAt5 = 0
 	
+	maps = []
+	mrrs = []
+	pat1 = []
+	pat5 = []
+
 	for user in userQueriesAndClicks_strict.keys():
 		
 		userInfo = userQueriesAndClicks_strict[user]
@@ -115,10 +120,12 @@ def test():
 		# to compute average MAP for user
 		mapRandom = mapRandom / float(len(userInfo))
 		map = map / float(len(userInfo))
+		maps.append(map)
 		
 		# compute average MRR for user
 		mrrRandom = mrrRandom / float(len(userInfo))
 		mrr = mrr / float(len(userInfo))
+		mrrs.append(mrr)
 		
 		# compute average P@1 & P@5 for user
 		if precisionAt5Counter == 0:
@@ -128,9 +135,11 @@ def test():
 
 		precisionAt5 = precisionAt5 / precisionAt5Counter
 		precisionAt5Random = precisionAt5 / precisionAt5Counter
+		pat5.append(precisionAt5)
 
 		precisionAt1 = precisionAt1 / precisionAt1Counter
 		precisionAt1Random = precisionAt1Random / precisionAt1Counter
+		pat1.append(precisionAt1)
 
 		# keep track of average over all users
 		overallMAPRandom += mapRandom
@@ -170,6 +179,7 @@ def test():
 	print "Overall mrr = ", overallMRR, " (random = ", overallMRRRandom, ")"
 	print "Overall P@1 = ", overallPrecisionAt1, " (random = ", overallPrecisionAt1Random, ")"
 	print "Overall P@5 = ", overallPrecisionAt5, " (random = ", overallPrecisionAt5Random, ")"
+	print [maps, mrrs, pat1, pat5]
 
 # Calculates precision at rank len(relevanceJudgements) (so the caller should provide the right k already)
 # input ranked list of document with indicator 1 for relevant, 0 for irrelevant example: [1, 1, 0, 0, 1, 0]
