@@ -1,7 +1,7 @@
 import userLM as user
 import userLMExtended as userExtended
 
-def sim(A, B, minCommonTerms):
+def sim(A, B, queriesA, minCommonTerms):
 	print "Simple"
 	similarityScore = 0
 
@@ -9,7 +9,7 @@ def sim(A, B, minCommonTerms):
 	# if not, return 0
 	if A.termsInCommon(B) > minCommonTerms:
 		# calculate the similarity
-		for query in A.queries:
+		for query in queriesA:
 			similarityScore += B.p_q_u(query)
 		similarityScore = similarityScore / A.numberOfQueries
 	else:

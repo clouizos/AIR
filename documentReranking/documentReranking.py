@@ -14,7 +14,6 @@ allUsers = pickle.load(open('../../users', 'rb'))['users']
 
 # gives the ranking score for a document given similarUsers (everything is negative, but higher = better)
 
-# THIS IS VERY INEFFICIENT, it will create new user objects for all the Similar users and that's not good.
 def getRankingScoreForDocument(similarUsers, document):
 	rank = 0
 	# for all users, find the similarity score, add this to 
@@ -41,14 +40,16 @@ def createReRankingDump():
 		# take a user
 		userA = user.User(userID)
 
-		# get mostSimilar users
-		mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon, model, simMeausre)
-		mostSimilarUsers = [(user.User(tup[0]), tup[1]) for tup in mostSimilarUsers]
 
 		queryRankingResults = dict()
 		
 		# get ranking for every query
 		for query in userA.queries:
+
+			# get mostSimilar users
+			# now it is getting most similar users based on userA and the query... We could give more queries!
+			mostSimilarUsers = userA.getMostSimilarUsers(numberOfSimilarUsers, minTermsInCommon, model, simMeausre, [query])
+			mostSimilarUsers = [(user.User(tup[0]), tup[1]) for tup in mostSimilarUsers]
 
 			# get documents
 			documentsToReRank = userA.queryResults[query]

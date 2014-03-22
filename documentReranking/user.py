@@ -41,7 +41,7 @@ class User:
 		return clicks
 	
 	# THIS SHOULD BE EXTENDED TO FIND MORE FORMS OF SIMILARITY
-	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon, whichModel, whichSim):
+	def getMostSimilarUsers(self, numberOfMostSimilarUsers, minTermsInCommon, whichModel, whichSim, queriesA):
 		
 		# default model is the simple model
 		if whichModel == "extended":
@@ -64,7 +64,7 @@ class User:
 				# default model is the regular similarity
 				if whichSim == "mutual":
 				#	print "mutual"
-					similarityScore = sims.mutualSim(me, b, minTermsInCommon)
+					similarityScore = sims.mutualSim(me, b, queriesA, minTermsInCommon)
 				else:
 					similarityScore = sims.sim(me, b, minTermsInCommon)
 				
