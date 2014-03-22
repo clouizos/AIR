@@ -66,7 +66,7 @@ class User:
 				#	print "mutual"
 					similarityScore = sims.mutualSim(me, b, queriesA, minTermsInCommon)
 				else:
-					similarityScore = sims.sim(me, b, minTermsInCommon)
+					similarityScore = sims.sim(me, b, queriesA, minTermsInCommon)
 				
 				# find the numberOfMostSimilar users.
 				for i in range(len(mostSimilar)):
