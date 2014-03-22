@@ -97,8 +97,6 @@ def test():
 			ranking = evaluationFile[user][infoTriplet[0]]
 			relevanceJudgements = res.turnIntoBinaryRelevanceThing(infoTriplet[0], ranking)
 
-			print "Us: ", relevanceJudgements[:10]
-			print "Random: ", relevanceJudgementsRANDOM[:10]
 			mapRandom += averagePrecision(relevanceJudgementsRANDOM)
 			map += averagePrecision(relevanceJudgements)
 
