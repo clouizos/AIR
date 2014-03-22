@@ -128,8 +128,9 @@ es = Elasticsearch(host='localhost', port=9876)
 # connect database: (host, user, password, database)
 try:
     # SSDictCursor for memory-efficient, streaming query: rows as dictionaries
+    print "a"
     con = MySQLdb.connect('localhost', 'group2', 'group2air2k14', 'air2k14', cursorclass = MySQLdb.cursors.SSDictCursor);   
-    
+    print "b"
     # queries from ResultClickOverview    
     rco = "SELECT txt_SearchHistoryCookedQuery FROM \
         SearchHistory s JOIN ResultClickOverview r on r.int_SearchHistoryID = s.int_SearchHistoryID LIMIT 100"

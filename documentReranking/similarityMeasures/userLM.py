@@ -13,6 +13,7 @@ class UserLM:
 	numberOfQueries = 0
 
 	def __init__(self, userID):
+		print "Simple"
 		self.queries = userQueries[userID]
 		self.termFrequencies = termFrequencies[userID]
 		self.vocabularySize = sum(self.termFrequencies.values())
