@@ -62,13 +62,15 @@ def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamm
                         if user.assign[j] == k:
                             mu_uk_minus_current += 1
                 assign_group[k] = np.log((eta*gamma_k[k] + mu_uk_minus_current))
-                assign_group[k] += u.joint_q_d(theta_c[k,:], queries[user.queries[i]],
-                                               user.click_list[user.queries[i]],
-                                               docs, T, q_doc_features, user.queries[i])
+                inp = (theta_c[k,:], queries[user.queries[i]],
+                        user.click_list[user.queries[i]],
+                        docs, T, user.queries[i])
+                assign_group[k] += u.joint_q_d(inp)
             aux_assign = np.log(eta*gamma_e)
-            aux_assign += u.joint_q_d(theta_e, queries[user.queries[i]],
-                                      user.click_list[user.queries[i]],
-                                      docs, T, q_doc_features, user.queries[i])
+            inp = (theta_e, queries[user.queries[i]],
+                    user.click_list[user.queries[i]],
+                    docs, T, user.queries[i])
+            aux_assign += u.joint_q_d(inp)
             # get all the probabilities
             sample_prob = np.hstack((assign_group, aux_assign))
             # normalize
@@ -188,7 +190,7 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q=None):
         return gamma_k, gamma_e
 
 
-def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, out_q = None):
+def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, pool, out_q = None):
     print 'Sampling thetas...'
     #name = mpc.current_process().name
     #print name, 'Starting'
@@ -264,7 +266,7 @@ def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, pri
             if len(set(user_q[user]).intersection(queries_check)) >= 1:
                 users.append(user)
 
-        chain = u.HMC(iter_HMC, theta_c[k,:], queries, queries_of_k, users, user_q, user_clicks, docs, prior_params, q_doc_features)
+        chain = u.HMC(iter_HMC, theta_c[k,:], queries, queries_of_k, users, user_q, user_clicks, docs, prior_params, q_doc_features, pool)
         # Discard first 20% of MCMC chain
         clean = []
         for n in range(int(0.2 * iter_HMC), len(chain)):
@@ -379,9 +381,10 @@ if __name__ == '__main__':
     # for user in natsorted(user_q):
     #     if len(user_q[user]) <= 1:
     #         del user_q[user]
-
+    nr_us_k = 10
+    print 'Keeping nrU: %i' % nr_us_k
     # get only 30 users, will never finish otherwise
-    user_q = {k: v for k, v in user_q.items()[0:30]}
+    user_q = {k: v for k, v in user_q.items()[0:nr_us_k]}
     check_q_size = set([j for i in user_q.keys() for j in user_q[i]])
     print 'Keeping nrQ: %i' % len(check_q_size)
 
@@ -391,7 +394,7 @@ if __name__ == '__main__':
     tot_chain = []
     #out_q = mpc.Queue()
     #resultdict = {}
-
+    pool = mpc.Pool()
     for i in range(gibbs_iter):
         print 'Doing iteration %i ... ' % (i + 1)
 
@@ -436,7 +439,7 @@ if __name__ == '__main__':
         # resultdict.clear()
 
         gamma_k, gamma_e = sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q)
-        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features)
+        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, pool)
 
         params['gamma_k'] = np.copy(gamma_k)
         params['gamma_e'] = np.copy(gamma_e)
