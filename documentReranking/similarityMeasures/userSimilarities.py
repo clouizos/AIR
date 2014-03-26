@@ -2,7 +2,7 @@ import userLM as user
 import userLMExtended as userExtended
 
 def sim(A, B, minCommonTerms):
-	print "Simple"
+	#print "Simple"
 	similarityScore = 0
 
 	# check if they have minCommonTerms terms in common
@@ -18,7 +18,7 @@ def sim(A, B, minCommonTerms):
 	return  similarityScore
 
 def mutualSim(A, B, minCommonTerms):
-	print "Mutual"
+	#print "Mutual"
 	similarityScoreAB = 0
 	similarityScoreBA = 0
 

@@ -17,7 +17,7 @@ class UserLMExtended:
 	numberOfQueries = 0
 
 	def __init__(self, userID):
-		print "Extended"
+		#print "Extended"
 		self.id = userID
 
 		# first extract termFrequnecies from the indexed file
