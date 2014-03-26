@@ -94,8 +94,8 @@ def joint_q_d(theta_c, query, click_list, docs, T, q_doc_features, str_query):
     beta_c = theta_c[2*T:]
 
     # get the corresponding clicks and non clicks
-    ind_clicked = [i for i, v in enumerate(click_list) if v[1] is True]
-    ind_not_clicked = [i for i, v in enumerate(click_list) if v[1] is False]
+    ind_clicked = [i for i, v in enumerate(click_list) if v[1] == 1]
+    ind_not_clicked = [i for i, v in enumerate(click_list) if v[1] == 0]
 
     #print ind_clicked, ind_not_clicked
 
@@ -107,8 +107,8 @@ def joint_q_d(theta_c, query, click_list, docs, T, q_doc_features, str_query):
     for elem in comb:
         # probably we need log probability in order to avoid underflows
         #pair_prefs.append(pair_pref(beta_c, docs[click_list[elem[0]][0]], docs[click_list[elem[1]][0]]))
-        pair_prefs.append(np.log(pair_pref(beta_c, q_doc_features[str_query+':'+click_list[elem[0].split(':')[1]][0]],
-                                                   q_doc_features[str_query+':'+click_list[elem[1].split(':')[1]][0]])))
+        pair_prefs.append(np.log(pair_pref(beta_c, q_doc_features[str_query+':'+click_list[elem[0]][0].split(':')[1]],
+                                                   q_doc_features[str_query+':'+click_list[elem[1]][0].split(':')[1]])))
 
     if len(pair_prefs) >= 1:
         rank_prob = np.sum(pair_prefs)
@@ -199,8 +199,8 @@ def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, 
                 user_specific_click_list = click_list[user+':'+query]
 
                 # get the corresponding clicks and non clicks
-                ind_clicked = [i for i, v in enumerate(user_specific_click_list) if v[1] is True]
-                ind_not_clicked = [i for i, v in enumerate(user_specific_click_list) if v[1] is False]
+                ind_clicked = [i for i, v in enumerate(user_specific_click_list) if v[1] == 1]
+                ind_not_clicked = [i for i, v in enumerate(user_specific_click_list) if v[1] == 0]
 
                 # create all the combinations
                 comb = list(itertools.product(*[ind_clicked, ind_not_clicked]))
@@ -212,8 +212,8 @@ def eval_grad_loglike_theta(beta_k, theta_k, queries, component, users, user_q, 
                     # print 'check: ' + str(check_grad(pair_pref, grad_pair_pref, beta_k, *args))
 
                     pair_prefs.append(grad_pair_pref(beta_k,
-                        q_doc_features[query+':'+user_specific_click_list[elem[0].split(':')[1]][0]],
-                        q_doc_features[query+':'+user_specific_click_list[elem[1].split(':')[1]][0]]))
+                        q_doc_features[query+':'+user_specific_click_list[elem[0]][0].split(':')[1]],
+                        q_doc_features[query+':'+user_specific_click_list[elem[1]][0].split(':')[1]]))
 
                 # if there was such a combination
                 if len(pair_prefs) >= 1:
