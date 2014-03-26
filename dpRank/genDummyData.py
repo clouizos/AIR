@@ -134,4 +134,4 @@ def gen_dummy(nr_docs, nr_queries, N, groups):
 if __name__ == '__main__':
 
     docs, queries, user_q, q_doc, user_clicks, q_doc_features = gen_dummy(100, 50, 5, 3)
-    print q_doc_features
+    print user_clicks
