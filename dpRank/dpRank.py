@@ -8,9 +8,11 @@ from pymc import dirichlet_expval
 from copy import deepcopy
 import multiprocessing as mpc
 import cPickle as pickle
+import shelve
 
 # we will take log(0) = -Inf so turn off this warning
 # np.seterr(divide='ignore')
+
 
 class User:
     # matrix for query probabilities for each group
@@ -27,7 +29,7 @@ class User:
     def __init__(self, user, queries, user_clicks, K):
         #self.q_assign = np.zeros((len(queries), K))
         self.user_name = user
-        self.queries = natsorted(list(queries))
+        self.queries = natsorted(map(str, list(queries)))
         self.assign = np.zeros(len(queries), dtype=int)
         for i in xrange(len(queries)):
             self.click_list[self.queries[i]] = user_clicks[user+':'+self.queries[i]]
@@ -293,34 +295,52 @@ if __name__ == '__main__':
     # will create a trunctated DP that approximates
     # the infinite one
     # init number of groups, will change according to the data
-    K = 2
-
-    # nr of query features
-    T = 5
-    # nr of document features
-    V = 65
-    # nr of users
-    N = 20
-
-    prior_params = [alpha0, mu0, sigma0, T, V, beta0]
-    # args for the dummy data generator
-    nr_docs = 500
-    nr_queries = 50
-
-    # dummy groups
-    groups = 5
+    K = 1
 
     # active components (components that have observations)
     active_components = [[] for i in range(K)]
 
     # get some dummy data
-    docs, queries, user_q, q_doc, user_clicks, q_doc_features = gen_dummy(nr_docs, nr_queries, N, groups)
+    # # nr of query features
+    # T = 5
+    # # nr of document features
+    # V = 65
+    # # nr of users
+    # N = 20
 
+    # # args for the dummy data generator
+    # nr_docs = 500
+    # nr_queries = 50
+
+    # # dummy groups
+    # groups = 5
+    # docs, queries, user_q, q_doc, user_clicks, q_doc_features = gen_dummy(nr_docs, nr_queries, N, groups)
+
+    # load the actual data
+    print 'Loading data...'
+    queries = shelve.open('/virdir/Scratch/saveDP13-20small/queries.db')
+    # flatten the arrays from (N,1) to (N,)
+    queries = {k: np.squeeze(v) for k, v in queries.iteritems()}
+    T = queries[queries.keys()[0]].shape[0]
+    user_q = shelve.open('/virdir/Scratch/saveDP13-20small/user_q.db')
+    N = len(user_q.keys())
+    q_doc_features = shelve.open('/virdir/Scratch/saveDP13-20small/docs.db')
+    # flatten the arrays from (M,1) to (M,)
+    q_doc_features = {k: np.squeeze(v) for k, v in q_doc_features.iteritems()}
+    V = q_doc_features[q_doc_features.keys()[0]].shape[0]
+    docs = set([doc.split(':')[1] for doc in q_doc_features.keys()])
+    q_doc = shelve.open('/virdir/Scratch/saveDP13-20small/q_doc.db')
+    user_clicks = shelve.open('/virdir/Scratch/saveDP13-20small/user_clicks.db')
+    print 'Finished loading data.'
+    prior_params = [alpha0, mu0, sigma0, T, V, beta0]
+
+    print 'Users:' + str(N) + ' Qfeat:' + str(T) + ' Dfeat:' + str(V)
+    print 'NrQ:' + str(len(queries)) + ' NrQD: ' + str(len(q_doc_features))
     # gibbs sampler params
-    gibbs_iter = 5
+    gibbs_iter = 100
     thinning = 5
     burnin = int(0.2 * gibbs_iter)
-    iter_HMC = 2
+    iter_HMC = 20
 
     ''' priors of the G0 '''
     # prior means
@@ -349,16 +369,21 @@ if __name__ == '__main__':
     theta_e = np.hstack((mu_kt.random(), tau_kt.random(), beta_ku.random()))
 
     # remove queries that have no users assigned (only applicable to the dummy data)
-    for query in natsorted(queries):
-        if len([i for i in user_q if query in user_q[i]]) == 0:
-            del queries[query]
+    # for query in natsorted(queries):
+    #     if len([i for i in user_q if query in user_q[i]]) == 0:
+    #         del queries[query]
 
     users_objects = {}
 
     # delete users that have less than one query
-    for user in natsorted(user_q):
-        if len(user_q[user]) <= 1:
-            del user_q[user]
+    # for user in natsorted(user_q):
+    #     if len(user_q[user]) <= 1:
+    #         del user_q[user]
+
+    # get only 30 users, will never finish otherwise
+    user_q = {k: v for k, v in user_q.items()[0:30]}
+    check_q_size = set([j for i in user_q.keys() for j in user_q[i]])
+    print 'Keeping nrQ: %i' % len(check_q_size)
 
     for user in natsorted(user_q):
         users_objects[user] = User(user, user_q[user], user_clicks, K)
