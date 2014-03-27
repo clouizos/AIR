@@ -16,6 +16,30 @@ def cosineSimilarity(vec1, vec2):
 			sim += vec1[i] * vec2[i]
 	else:
 		sim = -1
-
 	return sim
+
+def getQueriesForUser(userID):
+	queries = []
+	for infoTriplet in info[userID]:
+		queries.append(infoTriplet[0])
+	return queries
+
+def printMostSimilarUsers():
+	for user in usersMC:
+		bestSim = -1
+		bestUser = -1
+		found = False
+		for userB in usersMC:
+			if userB != user:
+				sim = cosineSimilarity(userMC[user], userMC[userB])
+				if sim > bestSim:
+					found = True
+					bestSim = sim
+					bestUser = userB
+		if found:
+			print getQueriesForUser(user)
+			print getQueriesForUser(bestUser)
+
+printMostSimilarUsers()
+
 
