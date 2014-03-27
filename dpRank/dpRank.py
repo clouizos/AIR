@@ -8,9 +8,11 @@ from pymc import dirichlet_expval
 from copy import deepcopy
 import multiprocessing as mpc
 import cPickle as pickle
+import shelve
 
 # we will take log(0) = -Inf so turn off this warning
 # np.seterr(divide='ignore')
+
 
 class User:
     # matrix for query probabilities for each group
@@ -27,7 +29,7 @@ class User:
     def __init__(self, user, queries, user_clicks, K):
         #self.q_assign = np.zeros((len(queries), K))
         self.user_name = user
-        self.queries = natsorted(list(queries))
+        self.queries = natsorted(map(str, list(queries)))
         self.assign = np.zeros(len(queries), dtype=int)
         for i in xrange(len(queries)):
             self.click_list[self.queries[i]] = user_clicks[user+':'+self.queries[i]]
@@ -60,13 +62,15 @@ def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamm
                         if user.assign[j] == k:
                             mu_uk_minus_current += 1
                 assign_group[k] = np.log((eta*gamma_k[k] + mu_uk_minus_current))
-                assign_group[k] += u.joint_q_d(theta_c[k,:], queries[user.queries[i]],
-                                               user.click_list[user.queries[i]],
-                                               docs, T, q_doc_features, user.queries[i])
+                inp = (theta_c[k,:], queries[user.queries[i]],
+                        user.click_list[user.queries[i]],
+                        docs, T, user.queries[i])
+                assign_group[k] += u.joint_q_d(inp)
             aux_assign = np.log(eta*gamma_e)
-            aux_assign += u.joint_q_d(theta_e, queries[user.queries[i]],
-                                      user.click_list[user.queries[i]],
-                                      docs, T, q_doc_features, user.queries[i])
+            inp = (theta_e, queries[user.queries[i]],
+                    user.click_list[user.queries[i]],
+                    docs, T, user.queries[i])
+            aux_assign += u.joint_q_d(inp)
             # get all the probabilities
             sample_prob = np.hstack((assign_group, aux_assign))
             # normalize
@@ -186,7 +190,7 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q=None):
         return gamma_k, gamma_e
 
 
-def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, out_q = None):
+def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, pool, out_q = None):
     print 'Sampling thetas...'
     #name = mpc.current_process().name
     #print name, 'Starting'
@@ -262,7 +266,7 @@ def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, pri
             if len(set(user_q[user]).intersection(queries_check)) >= 1:
                 users.append(user)
 
-        chain = u.HMC(iter_HMC, theta_c[k,:], queries, queries_of_k, users, user_q, user_clicks, docs, prior_params, q_doc_features)
+        chain = u.HMC(iter_HMC, theta_c[k,:], queries, queries_of_k, users, user_q, user_clicks, docs, prior_params, q_doc_features, pool)
         # Discard first 20% of MCMC chain
         clean = []
         for n in range(int(0.2 * iter_HMC), len(chain)):
@@ -293,34 +297,52 @@ if __name__ == '__main__':
     # will create a trunctated DP that approximates
     # the infinite one
     # init number of groups, will change according to the data
-    K = 2
-
-    # nr of query features
-    T = 5
-    # nr of document features
-    V = 65
-    # nr of users
-    N = 20
-
-    prior_params = [alpha0, mu0, sigma0, T, V, beta0]
-    # args for the dummy data generator
-    nr_docs = 500
-    nr_queries = 50
-
-    # dummy groups
-    groups = 5
+    K = 1
 
     # active components (components that have observations)
     active_components = [[] for i in range(K)]
 
     # get some dummy data
-    docs, queries, user_q, q_doc, user_clicks, q_doc_features = gen_dummy(nr_docs, nr_queries, N, groups)
+    # # nr of query features
+    # T = 5
+    # # nr of document features
+    # V = 65
+    # # nr of users
+    # N = 20
 
+    # # args for the dummy data generator
+    # nr_docs = 500
+    # nr_queries = 50
+
+    # # dummy groups
+    # groups = 5
+    # docs, queries, user_q, q_doc, user_clicks, q_doc_features = gen_dummy(nr_docs, nr_queries, N, groups)
+
+    # load the actual data
+    print 'Loading data...'
+    queries = shelve.open('/virdir/Scratch/saveDP13-20small/queries.db')
+    # flatten the arrays from (N,1) to (N,)
+    queries = {k: np.squeeze(v) for k, v in queries.iteritems()}
+    T = queries[queries.keys()[0]].shape[0]
+    user_q = shelve.open('/virdir/Scratch/saveDP13-20small/user_q.db')
+    N = len(user_q.keys())
+    q_doc_features = shelve.open('/virdir/Scratch/saveDP13-20small/docs.db')
+    # flatten the arrays from (M,1) to (M,)
+    q_doc_features = {k: np.squeeze(v) for k, v in q_doc_features.iteritems()}
+    V = q_doc_features[q_doc_features.keys()[0]].shape[0]
+    docs = set([doc.split(':')[1] for doc in q_doc_features.keys()])
+    q_doc = shelve.open('/virdir/Scratch/saveDP13-20small/q_doc.db')
+    user_clicks = shelve.open('/virdir/Scratch/saveDP13-20small/user_clicks.db')
+    print 'Finished loading data.'
+    prior_params = [alpha0, mu0, sigma0, T, V, beta0]
+
+    print 'Users:' + str(N) + ' Qfeat:' + str(T) + ' Dfeat:' + str(V)
+    print 'NrQ:' + str(len(queries)) + ' NrQD: ' + str(len(q_doc_features))
     # gibbs sampler params
-    gibbs_iter = 5
+    gibbs_iter = 100
     thinning = 5
     burnin = int(0.2 * gibbs_iter)
-    iter_HMC = 2
+    iter_HMC = 20
 
     ''' priors of the G0 '''
     # prior means
@@ -349,16 +371,22 @@ if __name__ == '__main__':
     theta_e = np.hstack((mu_kt.random(), tau_kt.random(), beta_ku.random()))
 
     # remove queries that have no users assigned (only applicable to the dummy data)
-    for query in natsorted(queries):
-        if len([i for i in user_q if query in user_q[i]]) == 0:
-            del queries[query]
+    # for query in natsorted(queries):
+    #     if len([i for i in user_q if query in user_q[i]]) == 0:
+    #         del queries[query]
 
     users_objects = {}
 
     # delete users that have less than one query
-    for user in natsorted(user_q):
-        if len(user_q[user]) <= 1:
-            del user_q[user]
+    # for user in natsorted(user_q):
+    #     if len(user_q[user]) <= 1:
+    #         del user_q[user]
+    nr_us_k = 10
+    print 'Keeping nrU: %i' % nr_us_k
+    # get only 30 users, will never finish otherwise
+    user_q = {k: v for k, v in user_q.items()[0:nr_us_k]}
+    check_q_size = set([j for i in user_q.keys() for j in user_q[i]])
+    print 'Keeping nrQ: %i' % len(check_q_size)
 
     for user in natsorted(user_q):
         users_objects[user] = User(user, user_q[user], user_clicks, K)
@@ -366,7 +394,7 @@ if __name__ == '__main__':
     tot_chain = []
     #out_q = mpc.Queue()
     #resultdict = {}
-
+    pool = mpc.Pool()
     for i in range(gibbs_iter):
         print 'Doing iteration %i ... ' % (i + 1)
 
@@ -411,7 +439,7 @@ if __name__ == '__main__':
         # resultdict.clear()
 
         gamma_k, gamma_e = sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q)
-        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features)
+        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, pool)
 
         params['gamma_k'] = np.copy(gamma_k)
         params['gamma_e'] = np.copy(gamma_e)
