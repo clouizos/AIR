@@ -120,12 +120,12 @@ def test():
 		# to compute average MAP for user
 		mapRandom = mapRandom / float(len(userInfo))
 		map = map / float(len(userInfo))
-		maps.append(mapRandom)
+		maps.append(map)
 		
 		# compute average MRR for user
 		mrrRandom = mrrRandom / float(len(userInfo))
 		mrr = mrr / float(len(userInfo))
-		mrrs.append(mrrRandom)
+		mrrs.append(mrr)
 		
 		# compute average P@1 & P@5 for user
 		if precisionAt5Counter == 0:
@@ -135,11 +135,11 @@ def test():
 
 		precisionAt5 = precisionAt5 / precisionAt5Counter
 		precisionAt5Random = precisionAt5 / precisionAt5Counter
-		pat5.append(precisionAt5Random)
+		pat5.append(precisionAt5)
 
 		precisionAt1 = precisionAt1 / precisionAt1Counter
 		precisionAt1Random = precisionAt1Random / precisionAt1Counter
-		pat1.append(precisionAt1Random)
+		pat1.append(precisionAt1)
 
 		# keep track of average over all users
 		overallMAPRandom += mapRandom
