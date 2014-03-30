@@ -1,5 +1,5 @@
 from __future__ import division
-from scipy.stats import norm
+import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 from natsort import natsorted
@@ -91,7 +91,7 @@ def proof_check(theta, dp, fig_n):
 # eq.2 of the paper
 #def joint_q_d(theta_c, query, click_list, docs, T, q_doc_features, str_query):
 def joint_q_d(funcin):
-    q_doc_features = shelve.open('/virdir/Scratch/saveDP13-20small/docs.db')
+    q_doc_features = shelve.open('/virdir/Scratch/saveFR2DP_330/docs.db')
     theta_c, query, click_list, docs, T, str_query = funcin
     # get the parameters for the group
     mu_c = theta_c[0:T]
@@ -114,7 +114,7 @@ def joint_q_d(funcin):
         #pair_prefs.append(pair_pref(beta_c, docs[click_list[elem[0]][0]], docs[click_list[elem[1]][0]]))
         pair_prefs.append(np.log(pair_pref(beta_c, np.squeeze(q_doc_features[str_query+':'+click_list[elem[0]][0].split(':')[1]]),
                                                    np.squeeze(q_doc_features[str_query+':'+click_list[elem[1]][0].split(':')[1]]))))
-
+    #print pair_prefs
     if len(pair_prefs) >= 1:
         rank_prob = np.sum(pair_prefs)
         #rank_prob = np.prod(pair_prefs)
@@ -128,13 +128,14 @@ def joint_q_d(funcin):
     # univariate estimates
     probs = []
     for i in range(sigma_c.shape[0]):
-        prob = norm(mu_c[i], sigma_c[i]).pdf(query[i])
+        prob = scipy.stats.norm(mu_c[i], sigma_c[i]).pdf(query[i])
+        #print prob
         if prob > 0:
             probs.append(np.log(prob))
         else:
             probs.append(np.log(10 ** -200))
         #probs.append(norm(mu_c[i], sigma_c[i]).pdf(query[i]))
-
+    #print probs
     p_q = np.sum(probs)
     #p_q = np.prod(probs)
 
@@ -175,9 +176,9 @@ def eval_loglike_theta(beta_k, theta_k, queries, component, users, user_q, click
     # estimate each one independently since we have i.i.d. samples
     # likelihood according to the prior distributions
     # just adding a very small number to avoid the log of 0
-    first_term = np.sum([np.log(norm(0, alpha0).pdf(beta_k[i]) + 10 ** -200) for i in range(beta_k.shape[0])])
-    first_term += np.sum([np.log(norm(mu0, sigma0).pdf(mu_k[i]) + 10 ** -200) for i in range(mu_k.shape[0])])
-    first_term += np.sum([np.log(norm(mu0, sigma0).pdf(sigma_k[i])+ 10 ** -200) for i in range(sigma_k.shape[0])])
+    first_term = np.sum([np.log(scipy.stats.norm(0, alpha0).pdf(beta_k[i]) + 10 ** -200) for i in range(beta_k.shape[0])])
+    first_term += np.sum([np.log(scipy.stats.norm(mu0, sigma0).pdf(mu_k[i]) + 10 ** -200) for i in range(mu_k.shape[0])])
+    first_term += np.sum([np.log(scipy.stats.norm(mu0, sigma0).pdf(sigma_k[i])+ 10 ** -200) for i in range(sigma_k.shape[0])])
 
     # likelihoods given query and click list
     sec_term = 0
@@ -262,7 +263,7 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
         old_theta_k = chain[len(chain) - 1]
         old_energy = -eval_loglike_theta(old_theta_k[2*T:], old_theta_k, queries,
                         component, users, user_q, user_clicks, docs, prior_params, q_doc_features, pool)
-        print 'old_energy: ' + str(old_energy)
+        #print 'old_energy: ' + str(old_energy)
         old_grad = -eval_grad_loglike_theta(old_theta_k[2*T:], old_theta_k, queries,
                                             component, users, user_q, user_clicks,
                                             docs, prior_params, q_doc_features, pool)
@@ -279,7 +280,7 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
         new_beta_k = new_theta_k[2*T:]
         # Do 5 Leapfrog steps.
         for tau in range(5):
-            print 'leap %i' % tau
+            #print 'leap %i' % tau
             # make half step in p
             p = p - stepsize*new_grad/2.0
             # make full step in alpha,
@@ -299,7 +300,7 @@ def HMC(iterations, theta_k, queries, component, users, user_q, user_clicks, doc
         new_energy = -eval_loglike_theta(new_theta_k[2*T:], new_theta_k, queries,
                                          component, users, user_q, user_clicks,
                                          docs, prior_params, q_doc_features, pool)
-        print 'new energy: ' + str(new_energy)
+        #print 'new energy: ' + str(new_energy)
         newH = np.dot(p, p)/2.0 + new_energy
         dH = newH - H
 
