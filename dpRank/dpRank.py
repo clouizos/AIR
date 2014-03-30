@@ -8,9 +8,11 @@ from pymc import dirichlet_expval
 from copy import deepcopy
 import multiprocessing as mpc
 import cPickle as pickle
+import shelve
 
 # we will take log(0) = -Inf so turn off this warning
 # np.seterr(divide='ignore')
+
 
 class User:
     # matrix for query probabilities for each group
@@ -27,7 +29,7 @@ class User:
     def __init__(self, user, queries, user_clicks, K):
         #self.q_assign = np.zeros((len(queries), K))
         self.user_name = user
-        self.queries = natsorted(list(queries))
+        self.queries = natsorted(map(str, list(queries)))
         self.assign = np.zeros(len(queries), dtype=int)
         for i in xrange(len(queries)):
             self.click_list[self.queries[i]] = user_clicks[user+':'+self.queries[i]]
@@ -60,17 +62,21 @@ def sample_c(users_objects, queries, alpha, eta, theta_c, theta_e, gamma_k, gamm
                         if user.assign[j] == k:
                             mu_uk_minus_current += 1
                 assign_group[k] = np.log((eta*gamma_k[k] + mu_uk_minus_current))
-                assign_group[k] += u.joint_q_d(theta_c[k,:], queries[user.queries[i]],
-                                               user.click_list[user.queries[i]],
-                                               docs, T, q_doc_features, user.queries[i])
+                inp = (theta_c[k,:], queries[user.queries[i]],
+                        user.click_list[user.queries[i]],
+                        docs, T, user.queries[i])
+                assign_group[k] += u.joint_q_d(inp)
             aux_assign = np.log(eta*gamma_e)
-            aux_assign += u.joint_q_d(theta_e, queries[user.queries[i]],
-                                      user.click_list[user.queries[i]],
-                                      docs, T, q_doc_features, user.queries[i])
+            inp = (theta_e, queries[user.queries[i]],
+                    user.click_list[user.queries[i]],
+                    docs, T, user.queries[i])
+            aux_assign += u.joint_q_d(inp)
             # get all the probabilities
             sample_prob = np.hstack((assign_group, aux_assign))
             # normalize
+            #sample_prob = (sample_prob - np.min(sample_prob))/np.ptp(sample_prob)
             sample_prob /= sample_prob.sum()
+            #print sample_prob, np.sum(sample_prob)
             user.assign[i] = np.random.multinomial(1, sample_prob).argmax()
 
         # assign the new object back
@@ -186,7 +192,7 @@ def sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q, out_q=None):
         return gamma_k, gamma_e
 
 
-def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, out_q = None):
+def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, pool, out_q = None):
     print 'Sampling thetas...'
     #name = mpc.current_process().name
     #print name, 'Starting'
@@ -262,7 +268,7 @@ def sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, pri
             if len(set(user_q[user]).intersection(queries_check)) >= 1:
                 users.append(user)
 
-        chain = u.HMC(iter_HMC, theta_c[k,:], queries, queries_of_k, users, user_q, user_clicks, docs, prior_params, q_doc_features)
+        chain = u.HMC(iter_HMC, theta_c[k,:], queries, queries_of_k, users, user_q, user_clicks, docs, prior_params, q_doc_features, pool)
         # Discard first 20% of MCMC chain
         clean = []
         for n in range(int(0.2 * iter_HMC), len(chain)):
@@ -293,34 +299,52 @@ if __name__ == '__main__':
     # will create a trunctated DP that approximates
     # the infinite one
     # init number of groups, will change according to the data
-    K = 2
-
-    # nr of query features
-    T = 5
-    # nr of document features
-    V = 65
-    # nr of users
-    N = 20
-
-    prior_params = [alpha0, mu0, sigma0, T, V, beta0]
-    # args for the dummy data generator
-    nr_docs = 500
-    nr_queries = 50
-
-    # dummy groups
-    groups = 5
+    K = 1
 
     # active components (components that have observations)
     active_components = [[] for i in range(K)]
 
     # get some dummy data
-    docs, queries, user_q, q_doc, user_clicks, q_doc_features = gen_dummy(nr_docs, nr_queries, N, groups)
+    # # nr of query features
+    # T = 5
+    # # nr of document features
+    # V = 65
+    # # nr of users
+    # N = 20
 
+    # # args for the dummy data generator
+    # nr_docs = 500
+    # nr_queries = 50
+
+    # # dummy groups
+    # groups = 5
+    # docs, queries, user_q, q_doc, user_clicks, q_doc_features = gen_dummy(nr_docs, nr_queries, N, groups)
+
+    # load the actual data
+    print 'Loading data...'
+    queries = shelve.open('/virdir/Scratch/saveFR2DP_330/queries.db')
+    # flatten the arrays from (N,1) to (N,)
+    queries = {k: np.squeeze(v) for k, v in queries.iteritems()}
+    T = queries[queries.keys()[0]].shape[0]
+    user_q = shelve.open('/virdir/Scratch/saveFR2DP_330/user_q.db')
+    N = len(user_q.keys())
+    q_doc_features = shelve.open('/virdir/Scratch/saveFR2DP_330/docs.db')
+    # flatten the arrays from (M,1) to (M,)
+    q_doc_features = {k: np.squeeze(v) for k, v in q_doc_features.iteritems()}
+    V = q_doc_features[q_doc_features.keys()[0]].shape[0]
+    docs = set([doc.split(':')[1] for doc in q_doc_features.keys()])
+    q_doc = shelve.open('/virdir/Scratch/saveFR2DP_330/q_doc.db')
+    user_clicks = shelve.open('/virdir/Scratch/saveFR2DP_330/user_clicks.db')
+    print 'Finished loading data.'
+    prior_params = [alpha0, mu0, sigma0, T, V, beta0]
+
+    print 'Users:' + str(N) + ' Qfeat:' + str(T) + ' Dfeat:' + str(V)
+    print 'NrQ:' + str(len(queries)) + ' NrQD: ' + str(len(q_doc_features))
     # gibbs sampler params
-    gibbs_iter = 5
+    gibbs_iter = 100
     thinning = 5
     burnin = int(0.2 * gibbs_iter)
-    iter_HMC = 2
+    iter_HMC = 5
 
     ''' priors of the G0 '''
     # prior means
@@ -349,16 +373,32 @@ if __name__ == '__main__':
     theta_e = np.hstack((mu_kt.random(), tau_kt.random(), beta_ku.random()))
 
     # remove queries that have no users assigned (only applicable to the dummy data)
-    for query in natsorted(queries):
-        if len([i for i in user_q if query in user_q[i]]) == 0:
-            del queries[query]
+    # for query in natsorted(queries):
+    #     if len([i for i in user_q if query in user_q[i]]) == 0:
+    #         del queries[query]
 
     users_objects = {}
 
     # delete users that have less than one query
-    for user in natsorted(user_q):
-        if len(user_q[user]) <= 1:
-            del user_q[user]
+    # for user in natsorted(user_q):
+    #     if len(user_q[user]) <= 1:
+    #         del user_q[user]
+    nr_us_k = 10
+    print 'Keeping nrU: %i' % nr_us_k
+    # get only 30 users, will never finish otherwise
+    #strict_us_en =  [u'UID910', u'UID173', u'UID520', u'UID277', u'UID779', u'UID279', u'UID1524', u'UID1352', u'UID1287', u'UID376', u'UID1052', u'UID824', u'UID1207', u'UID10', u'UID11', u'UID1440', u'UID904', u'UID169', u'UID450', u'UID162', u'UID908', u'UID1420', u'UID205', u'UID288', u'UID1227', u'UID287', u'UID762', u'UID1323', u'UID204', u'UID1049', u'UID1536', u'UID1325', u'UID361', u'UID76', u'UID1046', u'UID684', u'UID1438', u'UID1235', u'UID1120', u'UID1123', u'UID65', u'UID1124', 'UID67', 'UID933', 'UID7', 'UID365', 'UID509', 'UID350', 'UID352', 'UID295', 'UID751', 'UID502', 'UID565', 'UID920', 'UID215', 'UID1332', 'UID1133', 'UID1130', 'UID1428', 'UID854', 'UID853', 'UID1039', 'UID1226', 'UID984', 'UID1423', 'UID981', 'UID858', 'UID1424', 'UID1095', 'UID1097', 'UID1073', 'UID921', 'UID748', 'UID342', 'UID437', 'UID340', 'UID108', 'UID1238', 'UID1495', 'UID349', 'UID9', 'UID46', 'UID181', 'UID41', 'UID189', 'UID49', 'UID993', 'UID1258', 'UID1383', 'UID1024', 'UID1251', 'UID1389', 'UID884', 'UID522', 'UID731', 'UID481', 'UID482', 'UID954', 'UID139', 'UID131', 'UID133', 'UID1485', 'UID868', 'UID513', 'UID1157', 'UID1408', 'UID1392', 'UID1397', 'UID839', 'UID1010', 'UID1242', 'UID1015', 'UID721', 'UID1142', 'UID941', 'UID649', 'UID416', 'UID642', 'UID411', 'UID1004', 'UID1276', 'UID321', 'UID797', 'UID1362', 'UID1478', 'UID949', 'UID1184', 'UID154', 'UID861', 'UID547', 'UID546', 'UID791', 'UID792', 'UID48', 'UID465', 'UID259', 'UID318', 'UID256', 'UID1386', 'UID1379', 'UID1503', 'UID1370', 'UID1371', 'UID1454', 'UID386', 'UID144', 'UID1193', 'UID871', 'UID873', 'UID388', 'UID574', 'UID576', 'UID578', 'UID1474', 'UID474', 'UID667', 'UID1060', 'UID1066', 'UID1217', 'UID251', 'UID1215', 'UID1212', 'UID1211', 'UID1107', 'UID1513', 'UID978']
+    #strict_us = ['UID910', 'UID173', 'UID520', 'UID277', 'UID779', 'UID279', 'UID1524', 'UID1352', 'UID1287', 'UID376']
+    strict_us = ['UID910', 'UID173', 'UID520', 'UID277', 'UID779', 'UID279', 'UID1524', 'UID1352', 'UID1287', 'UID376', 'UID1052', 'UID824', 'UID1207', 'UID10', 'UID11', 'UID1440', 'UID904', 'UID169', 'UID450', 'UID162', 'UID908', 'UID1420', 'UID205', 'UID288', 'UID1227', 'UID287', 'UID762', 'UID1323', 'UID204', 'UID1049', 'UID1536', 'UID1325', 'UID361', 'UID76', 'UID1046', 'UID684', 'UID1438', 'UID1235', 'UID1120', 'UID1123', 'UID65', 'UID1124', 'UID67', 'UID933', 'UID7', 'UID365', 'UID509', 'UID350', 'UID352', 'UID295', 'UID751', 'UID502', 'UID565', 'UID920', 'UID215', 'UID1332', 'UID1133', 'UID1130', 'UID1428', 'UID854', 'UID853', 'UID1039', 'UID1226', 'UID984', 'UID1423', 'UID981', 'UID858', 'UID1424', 'UID1095', 'UID1097', 'UID1073', 'UID921', 'UID748', 'UID342', 'UID437', 'UID340', 'UID108', 'UID1238', 'UID1495', 'UID349', 'UID9', 'UID46', 'UID181', 'UID41', 'UID189', 'UID49', 'UID993', 'UID1258', 'UID1383', 'UID1024', 'UID1251', 'UID1389', 'UID884', 'UID522', 'UID731', 'UID481', 'UID482', 'UID954', 'UID139', 'UID131', 'UID133', 'UID1485', 'UID868', 'UID513', 'UID1157', 'UID1408', 'UID1392', 'UID1397', 'UID839', 'UID1010', 'UID1242', 'UID1015', 'UID721', 'UID1142', 'UID941', 'UID649', 'UID416', 'UID642', 'UID411', 'UID1004', 'UID1276', 'UID321', 'UID797', 'UID1362', 'UID1478', 'UID949', 'UID1184', 'UID154', 'UID861', 'UID547', 'UID546', 'UID791', 'UID792', 'UID48', 'UID465', 'UID259', 'UID318', 'UID256', 'UID1386', 'UID1379', 'UID1503', 'UID1370', 'UID1371', 'UID1454', 'UID386', 'UID144', 'UID1193', 'UID871', 'UID873', 'UID388', 'UID574', 'UID576', 'UID578', 'UID1474', 'UID474', 'UID667', 'UID1060', 'UID1066', 'UID1217', 'UID251', 'UID1215', 'UID1212', 'UID1211', 'UID1107', 'UID1513', 'UID978']
+    #user_q = {k: v for k, v in user_q.items()[0:nr_us_k]}
+    strict_keys = set(strict_us).intersection(set(user_q.keys()))
+    #print strict_keys
+    user_rel_q = {}
+    for key in natsorted(list(strict_keys))[0:nr_us_k]:
+        user_rel_q[key] = user_q[key]
+    user_q = user_rel_q
+    print user_q.keys()
+    check_q_size = set([j for i in user_q.keys() for j in user_q[i]])
+    print 'Keeping nrQ: %i' % len(check_q_size)
 
     for user in natsorted(user_q):
         users_objects[user] = User(user, user_q[user], user_clicks, K)
@@ -366,7 +406,7 @@ if __name__ == '__main__':
     tot_chain = []
     #out_q = mpc.Queue()
     #resultdict = {}
-
+    pool = mpc.Pool()
     for i in range(gibbs_iter):
         print 'Doing iteration %i ... ' % (i + 1)
 
@@ -411,7 +451,7 @@ if __name__ == '__main__':
         # resultdict.clear()
 
         gamma_k, gamma_e = sample_g(users_objects, gamma_k, gamma_e, alpha, eta, user_q)
-        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features)
+        theta_c = sample_theta(users_objects, theta_c, queries, user_q, docs, user_clicks, prior_params, iter_HMC, q_doc_features, pool)
 
         params['gamma_k'] = np.copy(gamma_k)
         params['gamma_e'] = np.copy(gamma_e)
@@ -424,6 +464,10 @@ if __name__ == '__main__':
         print theta_c[:, T:2*T]
 
         tot_chain.append(params.copy())
+
+        if (i % 5 == 0):
+            with open('clean_total.pickle', 'wb') as handle:
+                pickle.dump(tot_chain, handle)
 
     print
     print 'total chain:'
