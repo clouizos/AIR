@@ -10,6 +10,7 @@ from multiprocessing import Pool
 from itertools import chain
 import time, csv
 
+
 class Ensemble:
     def __init__(self, rate):
         self.trees = []
@@ -192,7 +193,7 @@ def learn(train_file, n_trees=10, learning_rate=0.1, k=10):
         # train_score
         start = time.clock()
         print "  --scoring on train"
-        train_score = ndcg(model_output, scores, queries, 10)
+        train_score = ndcg(model_output, scores, queries, k)
         print "  --iteration train score " + str(train_score) + ", took " + str(time.clock() - start) + "sec to calculate"
 
         # validation score
@@ -239,7 +240,7 @@ def evaluate(model, fn):
             writer.writerow(line)
 
     test_score = np.zeros(4)
-    test_ = [1,3,5,10]
+    test_ = [1, 3, 5, 10]
     for k in xrange(len(test_)):
         test_score[k] = ndcg(model.eval(features), scores.astype(int), queries.astype(int), test_[k])
 
@@ -255,6 +256,6 @@ if __name__ == "__main__":
     iterations = 30
     learning_rate = 0.001
 
-    model = learn(options.train_file, n_trees=200)
+    model = learn(options.train_file, n_trees=200, k=1)
     test_score = evaluate(model, options.predict_file)
     print 'Final NDCG: ' + str(test_score)
