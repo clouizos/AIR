@@ -1,0 +1,152 @@
+README
+======
+
+In order to run the Divide and Conquer code simply run DC.py (python DC.py) it contains everything that should be needed.
+
+def query_features(queries, reference, nr_rel_docs, total_features, dataq)
+    Generates query features according to a reference feature
+
+    queries : List of query strings that act as keys
+
+    reference : position of reference feature
+
+    nr_rel_docs : number of relevant documents that the mean and variance will be calculated so as to generate the query features
+
+    total_featues : number of features the feature vector for the query-document pairs has
+
+    dataq : dictionary where the feature vectors according to the returned documents for a given query are
+    (query from the queries list act as the key)
+
+
+def get_dic_per_cluster(clust_q, data_cluster, dataq, i, out_q=None, kerPCA=False)
+    Function to generate a per cluster feature representation for a specific cluster
+
+    clust_q : query strings that are in that cluster
+
+    data_cluster : where the the feature vectors should be stored, it should be a vector of size = (1, N), where N is the number of features (it is used only in order to know the feature vector size, the actual feature vectors will be constructed inside this function)
+
+    dataq : dictionary containing the feature vectors per query (key : query string, value : KxN matrix (K docs, N features))
+
+    i : index of cluster that the function takes place at
+
+    out_q : outgoing queue,  used if you want multiprocessing
+
+    kerPCA : Define if you want to do Kernel PCA (boolean, otherwise the sparse dictionary will be created)
+
+
+def create_dics(each_cluster, dataq, train, total_features=64, parallel=False, kerPCA=False)
+    Function that will create the per cluster representation for all clusters
+
+    each_cluster : List of lists that each sublist contains the indices of the queries in that cluster
+
+    dataq : Same dictionary as before
+
+    train : Array that contains all the training queries
+
+    total_features : total number of features in the representation for the q-doc pairs
+
+    parallel : Boolean to denot multiprocessing or not
+
+    kerPCA : denote if you want kernel PCA or dictionary learning processing
+
+
+def train_cl(data_cluster, labels_cluster, i, dic=None, out_q=None):
+    Train the classifier for one cluster
+
+    data_cluster : feature vectors that belong in that cluster
+
+    labels_cluster : their respective labels
+
+    i :  the index of the cluster that is being trained
+
+    dic : None if you do not have per cluster feature processing or else the object of the transformation class
+
+    out_q : queue if you want the multiprocessing
+
+
+def train_ensemble(each_cluster, dataq, labelq, train, dics=None, total_features=64, parallel=False)
+    Train the ensemble of the classifiers
+
+    each_cluster : Same as before
+
+    dataq: same as before
+
+    labelq : disctionary the contains the labels per query (key : query string, value : (K,) where K is the number of retrieved documents for that query)
+
+    train :  Array containing all the training query strings
+
+    dics : List of objects that contains the possible objects per cluster that perform the transformation
+
+    total_features : total feature size in the representation
+
+    parallel : if you want the multiprocessing module and parallel computation
+
+
+def parse_test_dis(data_cluster_train, data_cluster_test)
+    Parse the dissimilarity space of the testing queries according to the training ones
+
+    data_cluster_train : the training feature vectors for the queries
+
+    data_cluster_test : the testing feature vectors for the queries
+
+
+def estimate_cluster_prob(test_dis, dpgmm, clusters)
+    Estimate the membership for the testing queries in the training clusters
+
+    test_dis : feature vectors for the testing queries
+
+    dpgmm : Object of the Dirichlet Process Gaussian Mixture
+
+    clusters : Indices of the clusters that dpgmm found that they have queries assigned
+
+
+def predict_ensemble(ensemble, estimates, test, dataq, dics=None, kerPCA=False)
+    Predict the rankings from each classifier in the ensemble
+
+    ensemble : List of objects (each object is a trained classifier)
+
+    estimates : estimates of cluster membership for each testing query
+
+    test : Array that contains the testing query strings
+
+    dataq : same as before
+
+    dics : same as before
+
+    kerPCA : same as before
+
+
+def find_final_ranking(predictions_per_q)
+    Aggregates the predictions and finds the average ranking
+
+    predictions_per_q : dictionary where key = query string and value = list of arrays where each array is the prediction from one classifier
+
+
+def dcg(preds, k)
+    Find DCG for a given position k and predictions preds (preds is a list that contains the relevance in the position i)
+
+
+def get_ndcg(ranked_list_per_q, labelsq, rel_k)
+    Finds the average normalized dcg for all the queries
+
+    ranked_list_per_q : dictionary where query string is the key and the value is a list of the relative ordering of the indices of the feature vectors
+
+    labelsq : dictionary of the labels per query where the key is the query string and the value is a list of the relevance values
+
+    rel_k : list of positions to determing the ndcg at
+
+
+def create_txt_files(training, testing, data, labels, q_to_id, num_feat=64)
+    Creates the training and testing txt files that will be used to train and test the LambdaMART
+
+    training : training queries
+
+    testing : testing queries
+
+    data : same as dataq before
+
+    labels : same as labelsq before
+
+    q_to_id : dictionary that maps a query string to an id
+
+    num_feat : number of features in the query-document pairs
