@@ -148,8 +148,7 @@ with con:
     #         if stopword in dictionary.token2id]
     once_ids = [tokenid for tokenid, docfreq in dictionary.dfs.iteritems() if docfreq == 1]
     dictionary.filter_tokens(once_ids) # remove stop words and words that appear only once
-    dictionary.compactify() # remove gaps in id sequence after words that were removed    
-    print len(dictionary)
+    dictionary.compactify() # remove gaps in id sequence after words that were removed
     cur.close()
     
     # 2nd pass: vectorizing
@@ -157,11 +156,17 @@ with con:
     cur = con.cursor()
     docs = Docs(cur, rco)
     corpus = Corpus(dictionary, docs)
+    
     # save corpus in Market Matrix format
     corpora.MmCorpus.serialize('/tmp/corpus.mm', corpus)
     # load corpus iterator from MM file
-    mm = corpora.MmCorpus('/tmp/corpus.mm')  
+    mm = corpora.MmCorpus('/tmp/corpus.mm')
     
+    
+    print "converting to tfidf model"
+    tfidf = models.TfidfModel(mm)
+    corpus_tfidf = tfidf[mm]
+    print "conversion finished"
     # distributed
     # online lda
     #lda = models.ldamodel.LdaModel(corpus=mm, id2word=dictionary, num_topics=10, update_every=1, chunksize=10000, passes=1, distributed=True)
@@ -172,7 +177,7 @@ with con:
     # online lda
     #lda = models.ldamodel.LdaModel(corpus=mm, id2word=dictionary, num_topics=10, update_every=1, chunksize=10000, passes=1)
     # batch lda
-    lda = models.ldamodel.LdaModel(corpus=mm, id2word=dictionary, num_topics=10, update_every=0, passes=20)    
+    lda = models.ldamodel.LdaModel(corpus=corpus_tfidf, id2word=dictionary, num_topics=10, update_every=0, passes=20)    
     lda.show_topics(10, formatted=False)    
     
     cur.close()

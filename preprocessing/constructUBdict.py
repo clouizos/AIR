@@ -30,26 +30,68 @@ def saveJson(text,filename):
 def grabDoc(r):
     total = []
     try : 
-        total.append(r['_source']['expressie']['niveau']['beschrijving'])
+        total.append('--titel-- '+r['_source']['expressie']['titel']['tekst'])
+    except :
+        pass
+    try : 
+        total.append('--titel-- '+r['_source']['selectie']['titel']['tekst'])
+    except :
+        pass
+    try : 
+        total.append('--opnamedatum-- '+r['_source']['expressie']['ext']['opnamedatum'])
+    except :
+        pass
+    try : 
+        total.append('--opnamedatum-- '+r['_source']['selectie']['ext']['opnamedatum'])
+    except :
+        pass
+    try : 
+        total.append('--geografische_namen-- '+r['_source']['expressie']['niveau']['geografische_namen'])
+    except :
+        pass
+    try : 
+        total.append('--geografische_namen-- '+r['_source']['selectie']['niveau']['geografische_namen'])
+    except :
+        pass    
+    try : 
+        maker = r['_source']['expressie']['maker']
+        mn = ''
+        for m in maker :
+            mn += (m['naam']+' - ')
+        if len(mn)>2:
+            total.append('--maker-- '+mn[:-2]) #remove the last "- "
+    except :
+        pass
+    try : 
+        maker = r['_source']['selectie']['maker']
+        mn = ''
+        for m in maker :
+            mn += (m['naam']+' ')
+        if len(mn)>2:
+            total.append('--maker-- '+mn[:-2])
+    except :
+        pass    
+    
+    try : 
+        total.append('--beschrijving-- '+r['_source']['expressie']['niveau']['beschrijving'])
     except :
         pass
     try :
-        total.append(r['_source']['selectie']['niveau']['beschrijving'])
+        total.append('--beschrijving-- '+r['_source']['selectie']['niveau']['beschrijving'])
     except :
         pass
     try :
-        total.append(r['_source']['expressie']['niveau']['samenvatting'])
+        total.append('--samenvatting-- '+r['_source']['expressie']['niveau']['samenvatting'])
     except :
         pass
     try :
-        total.append(r['_source']['selectie']['niveau']['samenvatting'])
+        total.append('--samenvatting--'+r['_source']['selectie']['niveau']['samenvatting'])
     except :
         pass
                         
     if len(total)>0:
         text = ' '.join(total)
     else:
-        print 'total = 00000000'
         text = ''
     return text
 

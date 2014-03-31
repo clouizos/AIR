@@ -4,15 +4,14 @@ from nltk.stem.snowball import SnowballStemmer
 
 stemmer = SnowballStemmer("dutch")
 
-# documents collection - only sample data at the moment
-documents = ['How to Bake Bread Without Recipes', 'The Classic Art of Viennese Pastry', 'Numerical Recipes: The Art of Scientific Computing',
-                            'Breads, Pastries, Pies and Cakes : Quantity Baking Recipes', 'Pastry: A Book of Best French Recipe']
+documents = pickle.load(open('documentContentList2.p'))
+documents = list(documents)
 
-# each unique term in the vocabulary will represent one row entry for the term-document matrix
-terms = ['bak', 'recipe', 'bread', 'cake', 'pastr', 'pie', 'how']
+terms = pickle.load(open('uniqueTerm2.p'))
+terms = list(terms)
 
 #query
-query = "Baking bread"
+query = "Sample query"
 
 def stem(x):
     try:
